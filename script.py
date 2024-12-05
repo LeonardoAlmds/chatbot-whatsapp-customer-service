@@ -100,8 +100,6 @@ def main():
                     notification.click()
                     
                     print("Reading received messages...")
-
-                    last_message_count = len(driver.find_elements(By.CSS_SELECTOR, 'div.message-in span.selectable-text'))
                     
                     message_hour = driver.find_elements(By.CLASS_NAME, 'x1rg5ohu.x16dsc37')
                     last_hour = message_hour[-1].text
@@ -113,36 +111,32 @@ def main():
                         sleep(5)
 
                         received_messages = driver.find_elements(By.CSS_SELECTOR, 'div.message-in span.selectable-text')
-                        current_message_count = len(received_messages)
+                        
+                        print(received_messages[-1].text)
+                                
+                        last_message = received_messages[-1].text
+                                
+                        print(f"New message received: {last_message}" + " at " + last_hour)
 
-                        if current_message_count > last_message_count:
-                            new_messages = received_messages[last_message_count:]
-                            for message_element in new_messages:
-                                last_message = message_element.text
-                                print(f"New message received: {last_message}" + " at " + last_hour)
-
-                                if last_message == "1":
-                                    print("Seeing all products...")
-                                    seeAllProducts()
-                                    menu()
-                                elif last_message == "2":
-                                    print("Seeing all categories...")
-                                    seeAllCategories()
-                                    menu()
-                                elif last_message == "3":
-                                    print("Seeing all brands...")
-                                    seeAllBrands()
-                                    menu()
-                                elif last_message == "4":
-                                    print("Exiting...")
-                                    boolean = False
-                                    break
-                                else:
-                                    print("Invalid option. Try again.")
-                                    menu()
-
-                            last_message_count = current_message_count
-                            start_time = time.time()  # Reset the timer after receiving a message
+                        if last_message == "1":
+                            print("Seeing all products...")
+                            seeAllProducts()
+                            menu()
+                        elif last_message == "2":
+                            print("Seeing all categories...")
+                            seeAllCategories()
+                            menu()
+                        elif last_message == "3":
+                            print("Seeing all brands...")
+                            seeAllBrands()
+                            menu()
+                        elif last_message == "4":
+                            print("Exiting...")
+                            boolean = False
+                            break
+                        else:
+                            print("Invalid option. Try again.")
+                            menu()
 
                         if time.time() - start_time > 30:
                             print("No new messages received in the last 30 seconds.")
