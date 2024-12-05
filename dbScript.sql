@@ -7,6 +7,24 @@ CREATE TABLE users (
     last_message VARCHAR(50)
 );
 
+CREATE TABLE products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    brand VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE brands (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
 INSERT INTO products (name, price, category, brand) VALUES ('Iphone 12', 1200, 'smartphone', 'Apple');
 INSERT INTO products (name, price, category, brand) VALUES ('Galaxy S21', 1000, 'smartphone', 'Samsung');
 INSERT INTO products (name, price, category, brand) VALUES ('Macbook Pro', 2000, 'laptop', 'Apple');
