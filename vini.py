@@ -12,7 +12,9 @@ browser = webdriver.Chrome(options=options)
 wait = WebDriverWait(browser, 10)
 browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
-sleep(10)   
+sleep(15)   
+
+message = True
 
 def openUnread():
     unreadMessage = browser.find_element(By.XPATH, "/html/body/div[1]/div/div/div[3]/div[3]/div/div[2]/button[2]")
@@ -38,25 +40,31 @@ def menu():
         input_message.send_keys(message)
         input_message.send_keys(Keys.SHIFT, Keys.ENTER)
 
-    input_message.send_keys(Keys.ENTER)
-
-c = True
-while c:
-    try:
-        openUnread()
-        c = False
-    except Exception as e:
-        print(f"error {e}, trying again")
-        openUnread()
-i = 0
-message = 0
-while True:
-    sleep(2)
-    try:
-        bubbleNotifications = browser.find_elements(By.CLASS_NAME, "_ahlk")
-        for i in range(len(bubbleNotifications)):
-            notification = bubbleNotifications[i]
-            notification.click()
-        sleep(2)
-    except Exception as e:
-        print(f"error {e}")
+    #input_message.send_keys(Keys.ENTER)
+    
+def main():
+    c = True
+    while c:
+        try:
+            openUnread()
+            c = False
+        except Exception as e:
+            print(f"error {e}, trying again")
+            openUnread()
+    i = 0
+    while True:
+        sleep(1)
+        while message:
+            sleep(2)
+            try:
+                bubbleNotifications = browser.find_elements(By.CLASS_NAME, "_ahlk")
+                for i in range(len(bubbleNotifications)):
+                    notification = bubbleNotifications[i]
+                    notification.click()
+                    # aqui tem que ter uma logica de leitura de ultima mensagem
+                    menu()
+                    message = False
+                sleep(2)
+            except Exception as e:
+                print(f"error {e}")
+        message = True
