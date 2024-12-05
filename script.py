@@ -18,7 +18,6 @@ wait = WebDriverWait(driver, 10)
 whatsapp_url = "https://web.whatsapp.com/"
 driver.get(whatsapp_url)
 print("Scan the QR code and wait for login")
-sleep(15)
 
 coxinha = True
 
@@ -42,10 +41,12 @@ def menu():
         input_message.send_keys(message)
         input_message.send_keys(Keys.SHIFT, Keys.ENTER)
 
-    input_message.send_keys(Keys.ENTER)
+    #input_message.send_keys(Keys.ENTER)
 
 def openUnread():
-    unreadMessage = driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[3]/div[3]/div/div[2]/button[2]")
+    unreadMessage = wait.until(
+        EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[3]/div/div[2]/button[2]'))
+    )
     unreadMessage.click()
 
 def seeAllProducts():
@@ -56,7 +57,7 @@ def seeAllProducts():
         input_message.send_keys(message)
         input_message.send_keys(Keys.SHIFT, Keys.ENTER)
     
-    input_message.send_keys(Keys.ENTER)
+    #input_message.send_keys(Keys.ENTER)
 
 def seeAllCategories():
     categories = dbConfig.selectAllCategories()
@@ -66,7 +67,7 @@ def seeAllCategories():
         input_message.send_keys(message)
         input_message.send_keys(Keys.SHIFT, Keys.ENTER)
     
-    input_message.send_keys(Keys.ENTER)
+    #input_message.send_keys(Keys.ENTER)
 
 def seeAllBrands():
     brands = dbConfig.selectAllBrands()
@@ -76,7 +77,7 @@ def seeAllBrands():
         input_message.send_keys(message)
         input_message.send_keys(Keys.SHIFT, Keys.ENTER)
     
-    input_message.send_keys(Keys.ENTER)
+    #input_message.send_keys(Keys.ENTER)
 
 def main():
     global coxinha

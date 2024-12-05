@@ -14,8 +14,6 @@ browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
 sleep(15)   
 
-message = True
-
 def openUnread():
     unreadMessage = browser.find_element(By.XPATH, "/html/body/div[1]/div/div/div[3]/div[3]/div/div[2]/button[2]")
     unreadMessage.click()
@@ -41,8 +39,15 @@ def menu():
         input_message.send_keys(Keys.SHIFT, Keys.ENTER)
 
     #input_message.send_keys(Keys.ENTER)
-    
+
+def readMessage():
+    clientChat = browser.find_elements(By.CLASS_NAME, "_amk6 ")
+    if clientChat:
+        print(clientChat[-1].text)
+
+
 def main():
+    message = True
     c = True
     while c:
         try:
@@ -62,9 +67,16 @@ def main():
                     notification = bubbleNotifications[i]
                     notification.click()
                     # aqui tem que ter uma logica de leitura de ultima mensagem
-                    menu()
                     message = False
                 sleep(2)
             except Exception as e:
                 print(f"error {e}")
+        
+        readMessage()
+        menu()
+        
+            
+
         message = True
+
+main()
