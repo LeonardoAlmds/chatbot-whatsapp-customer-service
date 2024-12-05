@@ -4,46 +4,47 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
-import time
+from time import sleep
 
 import dbConfig
 
 service = Service()
 option = webdriver.EdgeOptions()
+option.add_argument("user-data-dir=C:/caminho/para/pasta/de/perfil")
 driver = webdriver.Edge(service=service, options=option)
 
+wait = WebDriverWait(driver, 10)
+whatsapp_url = "https://web.whatsapp.com/"
+driver.get(whatsapp_url)
+print("Scan the QR code and wait for login")
 
 def menu():
     input_message = wait.until(
         EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p'))
     )
 
-    message = "Options: "
-    input_message.send_keys(message)
-    input_message.send_keys(Keys.SHIFT, Keys.ENTER)
-    input_message.send_keys(Keys.SHIFT, Keys.ENTER)
+    messages = [
+        "Options:",
+        "",
+        "1 - SEE ALL PRODUCTS",
+        "2 - SEE ALL CATEGORIES",
+        "3 - SEE ALL BRANDS",
+        "4 - EXIT",
+        "",
+        "Type the number of the option you want to choose:"
+    ]
 
-    message = "1 - SEE ALL PRODUCTS"
-    input_message.send_keys(message)
-    input_message.send_keys(Keys.SHIFT, Keys.ENTER)
+    for message in messages:
+        input_message.send_keys(message)
+        input_message.send_keys(Keys.SHIFT, Keys.ENTER)
 
-    message = "2 - SEE ALL CATEGORIES"
-    input_message.send_keys(message)
-    input_message.send_keys(Keys.SHIFT, Keys.ENTER)
-
-    message = "3 - SEE ALL BRANDS"
-    input_message.send_keys(message)
-    input_message.send_keys(Keys.SHIFT, Keys.ENTER)
-
-    message = "4 - EXIT"
-    input_message.send_keys(message)
-    input_message.send_keys(Keys.SHIFT, Keys.ENTER)
-    input_message.send_keys(Keys.SHIFT, Keys.ENTER)
-
-        
-    message = "Type the number of the option you want to choose: "
-    input_message.send_keys(message)
     input_message.send_keys(Keys.ENTER)
+
+def openUnread():
+    unreadMessage = wait.until(
+        EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div/div/div[3]/div[3]/div/div[2]/button[2]"))
+    )
+    unreadMessage.click()
 
 def seeAllProducts():
     products = dbConfig.selectAllProduts()
@@ -54,7 +55,7 @@ def seeAllProducts():
         input_message.send_keys(Keys.SHIFT, Keys.ENTER)
     
     input_message.send_keys(Keys.ENTER)
-    
+
 def seeAllCategories():
     categories = dbConfig.selectAllCategories()
     input_message = driver.find_element(By.XPATH, '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p')
@@ -64,7 +65,7 @@ def seeAllCategories():
         input_message.send_keys(Keys.SHIFT, Keys.ENTER)
     
     input_message.send_keys(Keys.ENTER)
-    
+
 def seeAllBrands():
     brands = dbConfig.selectAllBrands()
     input_message = driver.find_element(By.XPATH, '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p')
@@ -75,78 +76,72 @@ def seeAllBrands():
     
     input_message.send_keys(Keys.ENTER)
 
-try:
-    whatsapp_url = "https://web.whatsapp.com/"
-    driver.get(whatsapp_url)
-    print("Scan the QR code and wait for login")
+c = True
+while c:
+    try:
+        openUnread()
+        c = False
+        try:      
+            input_message = wait.until(
+                EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p'))
+            )
 
-    wait = WebDriverWait(driver, 600)
-    search_bar = wait.until(
-        EC.presence_of_element_located((By.XPATH, '//*[@id="side"]/div[1]/div/div[2]/div[2]/div/div[1]/p'))
-    )
-    print("Logged in successfully")
+            message = "Hello, this is an automated message using Python and Selenium."
+            input_message.send_keys(message)
+            input_message.send_keys(Keys.SHIFT, Keys.ENTER)
+            input_message.send_keys(Keys.SHIFT, Keys.ENTER)
+            
+            message2 = "How can I help you today?"
+            input_message.send_keys(message2)
+            input_message.send_keys(Keys.ENTER)
+            
+            menu()
 
-    contact_name = "+55 81 9569-0977"
-    search_bar.send_keys(contact_name)
-    search_bar.send_keys(Keys.ENTER)
+            print("Messages sent successfully")
+            print("Reading received messages...")
 
-    input_message = wait.until(
-        EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p'))
-    )
+            last_message_count = len(driver.find_elements(By.CSS_SELECTOR, 'div.message-in span.selectable-text'))
+            
+            message_hour = driver.find_elements(By.CLASS_NAME, 'x1rg5ohu.x16dsc37')
+            last_hour = message_hour[-1].text
+            
+            while True:
+                sleep(5)
 
-    message = "Hello, this is an automated message using Python and Selenium."
-    input_message.send_keys(message)
-    input_message.send_keys(Keys.SHIFT, Keys.ENTER)
-    input_message.send_keys(Keys.SHIFT, Keys.ENTER)
-    
-    message2 = "How can I help you today?"
-    input_message.send_keys(message2)
-    input_message.send_keys(Keys.ENTER)
-    
-    menu()
+                received_messages = driver.find_elements(By.CSS_SELECTOR, 'div.message-in span.selectable-text')
+                current_message_count = len(received_messages)
 
-    print("Messages sent successfully")
-    print("Reading received messages...")
+                if current_message_count > last_message_count:
+                    new_messages = received_messages[last_message_count:]
+                    for message_element in new_messages:
+                        last_message = message_element.text
+                        print(f"New message received: {last_message}" + " at " + last_hour)
 
-    last_message_count = len(driver.find_elements(By.CSS_SELECTOR, 'div.message-in span.selectable-text'))
-    
-    message_hour = driver.find_elements(By.CLASS_NAME, 'x1rg5ohu.x16dsc37')
-    last_hour = message_hour[-1].text
-    
-    while True:
-        time.sleep(5)
+                        if last_message == "1":
+                            print("Seeing all products...")
+                            seeAllProducts()
+                            menu()
+                        elif last_message == "2":
+                            print("Seeing all categories...")
+                            seeAllCategories()
+                            menu()
+                        elif last_message == "3":
+                            print("Seeing all brands...")
+                            seeAllBrands()
+                            menu()
+                        elif last_message == "4":
+                            print("Exiting...")
+                            break
+                        else:
+                            print("Invalid option. Try again.")
+                            menu()
 
-        received_messages = driver.find_elements(By.CSS_SELECTOR, 'div.message-in span.selectable-text')
-        current_message_count = len(received_messages)
+                    last_message_count = current_message_count
 
-        if current_message_count > last_message_count:
-            new_messages = received_messages[last_message_count:]
-            for message_element in new_messages:
-                last_message = message_element.text
-                print(f"New message received: {last_message}" + " at " + last_hour)
-
-                if last_message == "1":
-                    print("Seeing all products...")
-                    seeAllProducts()
-                    menu()
-                elif last_message == "2":
-                    print("Seeing all categories...")
-                    seeAllCategories()
-                    menu()
-                elif last_message == "3":
-                    print("Seeing all brands...")
-                    seeAllBrands()
-                    menu()
-                elif last_message == "4":
-                    print("Exiting...")
-                    break
-                else:
-                    print("Invalid option. Try again.")
-                    menu()
-
-            last_message_count = current_message_count
-
-except Exception as e:
-    print(f"An error occurred: {e}")
-finally:
-    driver.quit()
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        finally:
+            driver.quit()
+    except Exception as e:
+        print(f"An error occurred: {e}, trying again")
+        openUnread()

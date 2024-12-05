@@ -1,6 +1,12 @@
 CREATE DATABASE whatsappPy;
 USE whatsappPy;
 
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    last_message VARCHAR(50)
+);
+
 INSERT INTO products (name, price, category, brand) VALUES ('Iphone 12', 1200, 'smartphone', 'Apple');
 INSERT INTO products (name, price, category, brand) VALUES ('Galaxy S21', 1000, 'smartphone', 'Samsung');
 INSERT INTO products (name, price, category, brand) VALUES ('Macbook Pro', 2000, 'laptop', 'Apple');
@@ -17,3 +23,7 @@ INSERT INTO categories (name) VALUES ('earbuds');
 INSERT INTO brands (name) VALUES ('Apple');
 INSERT INTO brands (name) VALUES ('Samsung');
 INSERT INTO brands (name) VALUES ('Microsoft');
+
+SELECT * FROM products;
+
+DROP TABLE users;
