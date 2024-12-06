@@ -13,7 +13,6 @@ browser = webdriver.Chrome(options=options)
 wait = WebDriverWait(browser, 10)
 browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
-  
 
 def openUnread():
     unreadMessage = wait.until(
@@ -41,13 +40,22 @@ def menu():
         input_message.send_keys(message)
         input_message.send_keys(Keys.SHIFT, Keys.ENTER)
 
-    #input_message.send_keys(Keys.ENTER)
+    input_message.send_keys(Keys.ENTER)
 
 def readMessage():
-    clientChat = browser.find_elements(By.CLASS_NAME, "_akbu")
-    #_amk6 << class que engloba o horario da mensagem.
-    if clientChat:
-        return clientChat[-1].text
+    try:
+
+        clientChats = wait.until(
+            EC.presence_of_all_elements_located((By.CLASS_NAME, '_akbu'))
+        )
+        if clientChats:
+            return clientChats[-1].text
+        else:
+            print("Nenhuma mensagem encontrada.")
+            return None
+    except Exception as e:
+        print(f"Erro inesperado: {e}")
+        return None
 
 def seeAllProducts():
     products = dbConfig.selectAllProduts()
@@ -80,6 +88,38 @@ def seeAllBrands():
     input_message.send_keys(Keys.ENTER)
 
 
+
+def getNumber():
+    number = wait.until(
+        EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[4]/div/header/div[2]/div[1]/div/div/span'))
+    )
+    return number.text
+
+currentService = []
+
+def validationList(phone):
+    if phone in currentService:
+        return False
+    currentService.append(phone)
+    print(currentService)
+    return True
+
+def removeNumber(phone):
+    if phone in currentService:
+        currentService.remove(phone)
+        print(currentService)
+
+def choices(lastMessage, phone):
+    if lastMessage == "1":
+        seeAllProducts()
+    elif lastMessage == "2":
+        seeAllCategories()
+    elif lastMessage == "3":
+        seeAllBrands()
+    elif lastMessage == "4":
+        print("number4")
+        removeNumber(phone)
+                    
 def main():
     message = True
     c = True
@@ -92,32 +132,22 @@ def main():
             openUnread()
     i = 0
     while True:
-        sleep(1)
         while message:
-            sleep(2)
             try:
                 bubbleNotifications = browser.find_elements(By.CLASS_NAME, "_ahlk")
                 for i in range(len(bubbleNotifications)):
                     notification = bubbleNotifications[i]
                     notification.click()
-                    lastMessage = readMessage()
-                    print(lastMessage)
 
-                    if lastMessage == "1":
-                        print("the chosen option is 1")
-                    elif lastMessage == "2":
-                        print("the chosen option is 2")
-                    elif lastMessage == "3":
-                        print("the chosen option is 3")
-                    elif lastMessage == "4":
-                        print("the chosen option is 4")
-                    else:
-                        print("invalid option")
-                        print("menu") # << this print is for represent the menu function
-                        continue
-                    print("menu") # << this print is for represent the menu function
+                    phone = getNumber()
+                    valid = validationList(phone)
+                    
+                    if valid:
+                        menu()
+                    elif valid != True:
+                        lastMessage = readMessage()
+                        choices(lastMessage, phone)    
                     message = False
-                sleep(2)
             except Exception as e:
                 print(f"error {e}")
         
