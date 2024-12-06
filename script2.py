@@ -18,7 +18,7 @@ print("Waiting for you scan your QRcode")
 
 input_box_xpath = '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p'
 
-def openUnread(wait):
+def openUnread():
     unreadMessage = wait.until(
         EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[3]/div/div[2]/button[2]'))
     )
@@ -60,7 +60,21 @@ def productMenu(input_box):
 
     input_box.send_keys(Keys.ENTER)
 
-def readMessage(wait):
+def goodbye(input_box):
+    messages = [
+        "Thank you for using our service.",
+        "Goodbye!",
+        "",
+        "If you want to use our service again, just send a message."
+    ]
+
+    for message in messages:
+        input_box.send_keys(message)
+        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+
+    input_box.send_keys(Keys.ENTER)
+
+def readMessage():
     try:
 
         clientChats = wait.until(
@@ -120,7 +134,7 @@ def seeAllBrands(input_box):
     
     input_box.send_keys(Keys.ENTER)
 
-def getNumber(wait):
+def getNumber():
     number = wait.until(
         EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[4]/div/header/div[2]/div[1]/div/div/span'))
     )
@@ -149,6 +163,7 @@ def choices(lastMessage, phone, input_box):
         seeAllBrands(input_box)
     elif lastMessage == "4":
         print("Option4 chosen, removing number")
+        goodbye(input_box)
         removeNumber(phone)
 
 def main():
@@ -156,7 +171,7 @@ def main():
     c = True
     while c:
         try:
-            openUnread(wait)
+            openUnread()
             c = False
         except Exception as e:
             print(f"error {e}, trying again")
@@ -170,7 +185,7 @@ def main():
                     notification = bubbleNotifications[i]
                     notification.click()
 
-                    phone = getNumber(wait)
+                    phone = getNumber()
                     valid = validationList(phone)
                     
                     input_box = browser.find_element(By.XPATH, input_box_xpath)
@@ -178,8 +193,9 @@ def main():
                     if valid:
                         menu(input_box)
                     elif valid != True:
-                        lastMessage = readMessage(wait)
+                        lastMessage = readMessage()
                         choices(lastMessage, phone, input_box)    
+                        menu(input_box)
                     message = False
             except Exception as e:
                 print(f"error {e}")
