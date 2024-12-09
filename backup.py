@@ -13,7 +13,6 @@ browser = webdriver.Chrome(options=options)
 wait = WebDriverWait(browser, 10)
 browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
-  
 
 def openUnread():
     unreadMessage = wait.until(
