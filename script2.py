@@ -8,14 +8,14 @@ from selenium.webdriver.common.keys import Keys
 from time import sleep
 import dbConfig
 
-options = webdriver.ChromeOptions()
+options = webdriver.EdgeOptions()
 options.add_argument("user-data-dir=C:/caminho/para/pasta/de/perfil")
 
-browser = webdriver.Chrome(options=options)
+browser = webdriver.Edge(options=options)
 wait = WebDriverWait(browser, 10)
 browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
-sleep(20)
+sleep(30)
 
 input_box_xpath = '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p'
 body = browser.find_element(By.XPATH, '/html/body')
@@ -24,6 +24,24 @@ def openUnread():
         EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[3]/div/div[2]/button[2]'))
     )
     unreadMessage.click()
+
+def firstMessage(input_box):
+    messages = [
+        "Hello! Welcome to our service.",
+        "How can I help you?",
+        "",
+        "Select one of the options below:"
+    ]
+    
+    
+    for message in messages:
+        input_box.send_keys(message)
+        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+
+    menu(input_box)
+        
+    input_box.send_keys(Keys.ENTER)
+    
 
 def menu(input_box):
     messages = [
@@ -192,7 +210,7 @@ def main():
                     input_box = browser.find_element(By.XPATH, input_box_xpath)
                     
                     if valid:
-                        menu(input_box)
+                        firstMessage(input_box)
                         body.send_keys(Keys.ESCAPE)
                     elif valid != True:
                         lastMessage = readMessage()
