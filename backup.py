@@ -1,3 +1,5 @@
+# Need to test if the new parameters are working
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -13,18 +15,17 @@ browser = webdriver.Chrome(options=options)
 wait = WebDriverWait(browser, 10)
 browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
+sleep(20)
 
+input_box_xpath = '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p'
+body = browser.find_element(By.XPATH, '/html/body')
 def openUnread():
     unreadMessage = wait.until(
         EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[3]/div/div[2]/button[2]'))
     )
     unreadMessage.click()
 
-def menu():
-    input_message = wait.until(
-        EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p'))
-    )
-
+def menu(input_box):
     messages = [
         "Options:",
         "",
@@ -37,10 +38,42 @@ def menu():
     ]
 
     for message in messages:
-        input_message.send_keys(message)
-        input_message.send_keys(Keys.SHIFT, Keys.ENTER)
+        input_box.send_keys(message)
+        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
 
-    input_message.send_keys(Keys.ENTER)
+    input_box.send_keys(Keys.ENTER)
+    
+def productMenu(input_box):
+    messages = [
+        "Options:",
+        "",
+        "1 - SEE ALL PRODUCTS",
+        "2 - SEE ALL PRODUCTS BY CATEGORY",
+        "3 - SEE ALL PRODUCTS BY BRAND",
+        "4 - EXIT",
+        "",
+        "Type the number of the option you want to choose:"
+    ]
+
+    for message in messages:
+        input_box.send_keys(message)
+        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+
+    input_box.send_keys(Keys.ENTER)
+
+def goodbye(input_box):
+    messages = [
+        "Thank you for using our service.",
+        "Goodbye!",
+        "",
+        "If you want to use our service again, just send a message."
+    ]
+
+    for message in messages:
+        input_box.send_keys(message)
+        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+
+    input_box.send_keys(Keys.ENTER)
 
 def readMessage():
     try:
@@ -57,37 +90,50 @@ def readMessage():
         print(f"Erro inesperado: {e}")
         return None
 
-def seeAllProducts():
+def seeAllProducts(input_box):
     products = dbConfig.selectAllProduts()
-    input_message = browser.find_element(By.XPATH, '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p')
     for product in products:
         message = f"Product: {product[1]} - Price: {product[2]}"
-        input_message.send_keys(message)
-        input_message.send_keys(Keys.SHIFT, Keys.ENTER)
+        input_box.send_keys(message)
+        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
-    input_message.send_keys(Keys.ENTER)
+    input_box.send_keys(Keys.ENTER)
+    
+def seeAllProductsByCategory(input_box, category):
+    products = dbConfig.selectAllProductsByCategory(category)
+    for product in products:
+        message = f"Product: {product[1]} - Price: {product[2]}"
+        input_box.send_keys(message)
+        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+    
+    input_box.send_keys(Keys.ENTER)
+    
+def seeAllProductsByBrand(input_box, brand):
+    products = dbConfig.selectAllProductsByBrand(brand)
+    for product in products:
+        message = f"Product: {product[1]} - Price: {product[2]}"
+        input_box.send_keys(message)
+        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+    
+    input_box.send_keys(Keys.ENTER)
 
-def seeAllCategories():
+def seeAllCategories(input_box):
     categories = dbConfig.selectAllCategories()
-    input_message = browser.find_element(By.XPATH, '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p')
     for category in categories:
         message = f"Category: {category[1]}"
-        input_message.send_keys(message)
-        input_message.send_keys(Keys.SHIFT, Keys.ENTER)
+        input_box.send_keys(message)
+        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
-    input_message.send_keys(Keys.ENTER)
+    input_box.send_keys(Keys.ENTER)
 
-def seeAllBrands():
+def seeAllBrands(input_box):
     brands = dbConfig.selectAllBrands()
-    input_message = browser.find_element(By.XPATH, '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p')
     for brand in brands:
         message = f"Brand: {brand[1]}"
-        input_message.send_keys(message)
-        input_message.send_keys(Keys.SHIFT, Keys.ENTER)
+        input_box.send_keys(message)
+        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
-    input_message.send_keys(Keys.ENTER)
-
-
+    input_box.send_keys(Keys.ENTER)
 
 def getNumber():
     number = wait.until(
@@ -109,17 +155,18 @@ def removeNumber(phone):
         currentService.remove(phone)
         print(currentService)
 
-def choices(lastMessage, phone):
+def choices(lastMessage, phone, input_box):
     if lastMessage == "1":
-        seeAllProducts()
+        seeAllProducts(input_box)
     elif lastMessage == "2":
-        seeAllCategories()
+        seeAllCategories(input_box)
     elif lastMessage == "3":
-        seeAllBrands()
+        seeAllBrands(input_box)
     elif lastMessage == "4":
-        print("number4")
+        print("Option4 chosen, removing number")
+        goodbye(input_box)
         removeNumber(phone)
-                    
+
 def main():
     message = True
     c = True
@@ -142,11 +189,17 @@ def main():
                     phone = getNumber()
                     valid = validationList(phone)
                     
+                    input_box = browser.find_element(By.XPATH, input_box_xpath)
+                    
                     if valid:
-                        menu()
+                        menu(input_box)
+                        body.send_keys(Keys.ESCAPE)
                     elif valid != True:
                         lastMessage = readMessage()
-                        choices(lastMessage, phone)    
+                        choices(lastMessage, phone, input_box)    
+                        menu(input_box)
+                        body.send_keys(Keys.ESCAPE)
+                        
                     message = False
             except Exception as e:
                 print(f"error {e}")
