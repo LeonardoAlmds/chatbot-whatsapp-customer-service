@@ -208,16 +208,16 @@ def main():
                     valid = validationList(phone)
                     
                     input_box = browser.find_element(By.XPATH, input_box_xpath)
+                    body.send_keys(Keys.PAGE_DOWN)
                     
                     if valid:
                         firstMessage(input_box)
                         body.send_keys(Keys.ESCAPE)
                     elif valid != True:
                         lastMessage = readMessage()
-                        choices(lastMessage, phone, input_box)    
+                        choices(lastMessage, phone, input_box)
                         menu(input_box)
                         body.send_keys(Keys.ESCAPE)
-                        
                     message = False
             except Exception as e:
                 print(f"error {e}")
