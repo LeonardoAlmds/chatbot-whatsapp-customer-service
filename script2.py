@@ -60,6 +60,28 @@ def menu(input_box):
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
 
     input_box.send_keys(Keys.ENTER)
+
+def failMenu(input_box):
+    failMessage = "I didn't understand your input, sorry! Please choose an option from below:"
+
+    input_box.send_keys(failMessage)
+    input_box.send_keys(Keys.ENTER)
+
+    messages = [
+        "",
+        "1 - SEE ALL PRODUCTS",
+        "2 - SEE ALL CATEGORIES",
+        "3 - SEE ALL BRANDS",
+        "4 - EXIT",
+        "",
+        "Type the number of the option you want to choose:"
+    ]
+
+    for message in messages:
+        input_box.send_keys(message)
+        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+
+    input_box.send_keys(Keys.ENTER)
     
 def productMenu(input_box):
     messages = [
@@ -182,6 +204,7 @@ def choices(lastMessage, phone, input_box):
         seeAllBrands(input_box)
     elif lastMessage == "4":
         print("Option4 chosen, removing number")
+        sleep(0.2)
         goodbye(input_box)
         removeNumber(phone)
 
@@ -209,14 +232,14 @@ def main():
                     
                     input_box = browser.find_element(By.XPATH, input_box_xpath)
                     body.send_keys(Keys.PAGE_DOWN)
-                    
+
                     if valid:
                         firstMessage(input_box)
                         body.send_keys(Keys.ESCAPE)
                     elif valid != True:
                         lastMessage = readMessage()
                         choices(lastMessage, phone, input_box)
-                        menu(input_box)
+                        failMenu(input_box)
                         body.send_keys(Keys.ESCAPE)
                     message = False
             except Exception as e:
