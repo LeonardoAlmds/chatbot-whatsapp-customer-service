@@ -3,7 +3,7 @@ import mysql.connector
 mydb = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="",
+    password="root",
     database="whatsappPy"
 )   
 
@@ -13,6 +13,18 @@ def selectAllProduts():
     mycursor.execute("SELECT * FROM products")
     myresult = mycursor.fetchall()
     return myresult
+
+def selectProductImgByName(name):
+    query = """
+        SELECT p.name, p.price, pi.img_url
+        FROM products p
+        INNER JOIN product_imgs pi ON p.id = pi.product_id
+        WHERE p.name = %s
+    """
+    mycursor.execute(query, (name,))
+    myresult = mycursor.fetchall()
+    return myresult
+
 
 def selectAllProductsByCategory(category):
     mycursor.execute("SELECT * FROM products WHERE category = %s", (category))

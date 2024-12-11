@@ -1,5 +1,3 @@
-# Need to test if the new parameters are working
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -19,6 +17,9 @@ sleep(30)
 
 input_box_xpath = '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p'
 body = browser.find_element(By.XPATH, '/html/body')
+audio_class = '_ak8y'
+img_class = '_amk6 _amlo'
+
 def openUnread():
     unreadMessage = wait.until(
         EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[3]/div/div[2]/button[2]'))
@@ -65,39 +66,16 @@ def failMenu(input_box):
     failMessage = "I didn't understand your input, sorry! Please choose an option from below:"
 
     input_box.send_keys(failMessage)
-    input_box.send_keys(Keys.ENTER)
-
-    messages = [
-        "",
-        "1 - SEE ALL PRODUCTS",
-        "2 - SEE ALL CATEGORIES",
-        "3 - SEE ALL BRANDS",
-        "4 - EXIT",
-        "",
-        "Type the number of the option you want to choose:"
-    ]
-
-    for message in messages:
-        input_box.send_keys(message)
-        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+    input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+        
+    menu(input_box)
 
     input_box.send_keys(Keys.ENTER)
     
 def productMenu(input_box):
-    messages = [
-        "Options:",
-        "",
-        "1 - SEE ALL PRODUCTS",
-        "2 - SEE ALL PRODUCTS BY CATEGORY",
-        "3 - SEE ALL PRODUCTS BY BRAND",
-        "4 - EXIT",
-        "",
-        "Type the number of the option you want to choose:"
-    ]
-
-    for message in messages:
-        input_box.send_keys(message)
-        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+    messages = 'Type the name of the product you want to see:'
+    
+    input_box.send_keys(messages)
 
     input_box.send_keys(Keys.ENTER)
 
@@ -139,7 +117,35 @@ def seeAllProducts(input_box):
     
     input_box.send_keys(Keys.ENTER)
     
-def seeAllProductsByCategory(input_box, category):
+def seeProductImgByName(input_box, name):
+    try:
+        product = dbConfig.selectProductImgByName(name)
+
+        if not product:
+            input_box.send_keys(f"Product '{name}' not found.")
+            input_box.send_keys(Keys.ENTER)
+            return
+
+        product_name = product[0][0]
+        product_price = product[0][1]
+        product_img_url = product[0][2]
+        message = f"Product: {product_name} - Price: {product_price}"
+        print(f"Product: {product_name} - Price: {product_price}")
+
+        input_box.send_keys(message)
+        input_box.send_keys(Keys.ENTER)
+
+        input_box.send_keys(f"Image URL: {product_img_url}")
+        print(f"Image URL: {product_img_url}")
+        input_box.send_keys(Keys.ENTER)
+
+    except Exception as e:
+        print(f"Error in seeProductImgByName: {e}")
+        input_box.send_keys("An error occurred while retrieving the product information.")
+        input_box.send_keys(Keys.ENTER)
+
+
+'''def seeAllProductsByCategory(input_box, category):
     products = dbConfig.selectAllProductsByCategory(category)
     for product in products:
         message = f"Product: {product[1]} - Price: {product[2]}"
@@ -156,6 +162,7 @@ def seeAllProductsByBrand(input_box, brand):
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
     input_box.send_keys(Keys.ENTER)
+'''
 
 def seeAllCategories(input_box):
     categories = dbConfig.selectAllCategories()
@@ -203,10 +210,21 @@ def choices(lastMessage, phone, input_box):
     elif lastMessage == "3":
         seeAllBrands(input_box)
     elif lastMessage == "4":
-        print("Option4 chosen, removing number")
+        print("Option 4 chosen, removing number")
         sleep(0.2)
         goodbye(input_box)
         removeNumber(phone)
+    elif lastMessage == "5":
+        # Isn't working
+        input_box.send_keys("Type the name of the product you want to see:")
+        input_box.send_keys(Keys.ENTER)
+
+        product_name = None
+        while not product_name:
+            product_name = readMessage()
+            sleep(2)
+
+        seeProductImgByName(input_box, product_name)
 
 def main():
     message = True
