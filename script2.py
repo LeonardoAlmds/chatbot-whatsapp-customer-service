@@ -116,34 +116,6 @@ def seeAllProducts(input_box):
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
     input_box.send_keys(Keys.ENTER)
-    
-def seeProductImgByName(input_box, name):
-    try:
-        product = dbConfig.selectProductImgByName(name)
-
-        if not product:
-            input_box.send_keys(f"Product '{name}' not found.")
-            input_box.send_keys(Keys.ENTER)
-            return
-
-        product_name = product[0][0]
-        product_price = product[0][1]
-        product_img_url = product[0][2]
-        message = f"Product: {product_name} - Price: {product_price}"
-        print(f"Product: {product_name} - Price: {product_price}")
-
-        input_box.send_keys(message)
-        input_box.send_keys(Keys.ENTER)
-
-        input_box.send_keys(f"Image URL: {product_img_url}")
-        print(f"Image URL: {product_img_url}")
-        input_box.send_keys(Keys.ENTER)
-
-    except Exception as e:
-        print(f"Error in seeProductImgByName: {e}")
-        input_box.send_keys("An error occurred while retrieving the product information.")
-        input_box.send_keys(Keys.ENTER)
-
 
 '''def seeAllProductsByCategory(input_box, category):
     products = dbConfig.selectAllProductsByCategory(category)
@@ -214,18 +186,7 @@ def choices(lastMessage, phone, input_box):
         sleep(0.2)
         goodbye(input_box)
         removeNumber(phone)
-    elif lastMessage == "5":
-        # Isn't working
-        input_box.send_keys("Type the name of the product you want to see:")
-        input_box.send_keys(Keys.ENTER)
-
-        product_name = None
-        while not product_name:
-            product_name = readMessage()
-            sleep(2)
-
-        seeProductImgByName(input_box, product_name)
-
+    
 def main():
     message = True
     c = True
