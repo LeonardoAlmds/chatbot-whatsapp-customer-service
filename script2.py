@@ -15,7 +15,7 @@ browser = webdriver.Edge(options=options)
 wait = WebDriverWait(browser, 10)
 browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
-sleep(30)
+sleep(50)
 
 input_box_xpath = '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p'
 body = browser.find_element(By.XPATH, '/html/body')
@@ -43,7 +43,6 @@ def firstMessage(input_box):
     menu(input_box)
         
     input_box.send_keys(Keys.ENTER)
-    body.send_keys(Keys.ESCAPE)
     
 
 def menu(input_box):
@@ -63,7 +62,6 @@ def menu(input_box):
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
 
     input_box.send_keys(Keys.ENTER)
-    body.send_keys(Keys.ESCAPE)
 
 def failMenu(input_box):
     failMessage = "I didn't understand your input, sorry! Please choose an option from below:"
@@ -74,7 +72,6 @@ def failMenu(input_box):
     menu(input_box)
 
     input_box.send_keys(Keys.ENTER)
-    body.send_keys(Keys.ESCAPE)
     
 def productMenu(input_box):
     messages = 'Type the name of the product you want to see:'
@@ -120,7 +117,6 @@ def seeAllProducts(input_box):
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
     input_box.send_keys(Keys.ENTER)
-    body.send_keys(Keys.ESCAPE)
 
 '''def seeAllProductsByCategory(input_box, category):
     products = dbConfig.selectAllProductsByCategory(category)
@@ -217,7 +213,6 @@ def seeAllCategories(input_box):
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
     input_box.send_keys(Keys.ENTER)
-    body.send_keys(Keys.ESCAPE)
 
 def seeAllBrands(input_box):
     brands = dbConfig.selectAllBrands()
@@ -227,7 +222,6 @@ def seeAllBrands(input_box):
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
     input_box.send_keys(Keys.ENTER)
-    body.send_keys(Keys.ESCAPE)
 
 def getNumber():
     number = wait.until(
@@ -265,7 +259,6 @@ def choices(lastMessage, phone, input_box):
         print("Invalid option")
         sleep(0.2)
         failMenu(input_box)
-        body.send_keys(Keys.ESCAPE)
     
 def main():
     message = True
@@ -280,6 +273,7 @@ def main():
     i = 0
     while True:
         while message:
+            body.send_keys(Keys.ESCAPE)
             try:
                 bubbleNotifications = browser.find_elements(By.CLASS_NAME, "_ahlk")
                 for i in range(len(bubbleNotifications)):
@@ -294,11 +288,9 @@ def main():
 
                     if valid:
                         firstMessage(input_box)
-                        body.send_keys(Keys.ESCAPE)
                     elif valid != True:
                         lastMessage = readMessage()
                         choices(lastMessage, phone, input_box)
-                        body.send_keys(Keys.ESCAPE)
                     message = False
             except Exception as e:
                 print(f"error {e}")
