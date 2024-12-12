@@ -4,6 +4,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from time import sleep
+from collections import defaultdict
+
 import dbConfig
 
 options = webdriver.EdgeOptions()
@@ -17,8 +19,7 @@ sleep(30)
 
 input_box_xpath = '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p'
 body = browser.find_element(By.XPATH, '/html/body')
-audio_class = '_ak8y'
-img_class = '_amk6 _amlo'
+user_budgets = defaultdict(list)
 
 def openUnread():
     unreadMessage = wait.until(
@@ -42,6 +43,7 @@ def firstMessage(input_box):
     menu(input_box)
         
     input_box.send_keys(Keys.ENTER)
+    body.send_keys(Keys.ESCAPE)
     
 
 def menu(input_box):
@@ -61,6 +63,7 @@ def menu(input_box):
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
 
     input_box.send_keys(Keys.ENTER)
+    body.send_keys(Keys.ESCAPE)
 
 def failMenu(input_box):
     failMessage = "I didn't understand your input, sorry! Please choose an option from below:"
@@ -71,6 +74,7 @@ def failMenu(input_box):
     menu(input_box)
 
     input_box.send_keys(Keys.ENTER)
+    body.send_keys(Keys.ESCAPE)
     
 def productMenu(input_box):
     messages = 'Type the name of the product you want to see:'
@@ -78,7 +82,7 @@ def productMenu(input_box):
     input_box.send_keys(messages)
 
     input_box.send_keys(Keys.ENTER)
-
+    
 def goodbye(input_box):
     messages = [
         "Thank you for using our service.",
@@ -116,6 +120,7 @@ def seeAllProducts(input_box):
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
     input_box.send_keys(Keys.ENTER)
+    body.send_keys(Keys.ESCAPE)
 
 '''def seeAllProductsByCategory(input_box, category):
     products = dbConfig.selectAllProductsByCategory(category)
@@ -136,6 +141,74 @@ def seeAllProductsByBrand(input_box, brand):
     input_box.send_keys(Keys.ENTER)
 '''
 
+def budget(phone, input_box):
+    try:
+        input_box.send_keys("Please type the name of the product you want to add to your budget:")
+        input_box.send_keys(Keys.ENTER)
+        sleep(2)
+
+        product_name = readMessage()
+
+        input_box.send_keys(f"How many units of {product_name} would you like to add?")
+        input_box.send_keys(Keys.ENTER)
+        sleep(2)
+
+        quantity_message = readMessage()
+        try:
+            quantity = int(quantity_message)
+        except ValueError:
+            input_box.send_keys("Invalid quantity. Please enter a valid number.")
+            input_box.send_keys(Keys.ENTER)
+            return
+
+        product = dbConfig.selectProductByName(product_name)
+        if not product:
+            input_box.send_keys(f"Sorry, the product '{product_name}' was not found in our inventory.")
+            input_box.send_keys(Keys.ENTER)
+            return
+
+        product_price = product[2]
+
+        total_price = product_price * quantity
+
+        user_budgets[phone].append({
+            "product_name": product_name,
+            "product_price": product_price,
+            "quantity": quantity,
+            "total_price": total_price
+        })
+
+        input_box.send_keys(f"{quantity} units of {product_name} added to your budget.")
+        input_box.send_keys(Keys.ENTER)
+
+        input_box.send_keys("Would you like to finalize your budget? Type 'yes' to finalize or 'no' to continue adding items.")
+        input_box.send_keys(Keys.ENTER)
+        sleep(2)
+
+        finalize_message = readMessage().lower()
+        if finalize_message == "yes":
+            input_box.send_keys("Here is your budget:")
+            input_box.send_keys(Keys.ENTER)
+
+            total_budget = 0
+            for item in user_budgets[phone]:
+                message = f"Product: {item['product_name']}, Unit Price: {item['product_price']}, Quantity: {item['quantity']}, Total: {item['total_price']}"
+                input_box.send_keys(message)
+                input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+                total_budget += item['total_price']
+
+            input_box.send_keys(f"Total Budget: {total_budget}")
+            input_box.send_keys(Keys.ENTER)
+
+            user_budgets.pop(phone, None)
+        else:
+            input_box.send_keys("You can continue adding items to your budget.")
+            input_box.send_keys(Keys.ENTER)
+
+    except Exception as e:
+        input_box.send_keys(f"An error occurred: {e}")
+        input_box.send_keys(Keys.ENTER)
+
 def seeAllCategories(input_box):
     categories = dbConfig.selectAllCategories()
     for category in categories:
@@ -144,6 +217,7 @@ def seeAllCategories(input_box):
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
     input_box.send_keys(Keys.ENTER)
+    body.send_keys(Keys.ESCAPE)
 
 def seeAllBrands(input_box):
     brands = dbConfig.selectAllBrands()
@@ -153,6 +227,7 @@ def seeAllBrands(input_box):
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
     input_box.send_keys(Keys.ENTER)
+    body.send_keys(Keys.ESCAPE)
 
 def getNumber():
     number = wait.until(
@@ -186,6 +261,11 @@ def choices(lastMessage, phone, input_box):
         sleep(0.2)
         goodbye(input_box)
         removeNumber(phone)
+    else:
+        print("Invalid option")
+        sleep(0.2)
+        failMenu(input_box)
+        body.send_keys(Keys.ESCAPE)
     
 def main():
     message = True
@@ -218,7 +298,6 @@ def main():
                     elif valid != True:
                         lastMessage = readMessage()
                         choices(lastMessage, phone, input_box)
-                        failMenu(input_box)
                         body.send_keys(Keys.ESCAPE)
                     message = False
             except Exception as e:

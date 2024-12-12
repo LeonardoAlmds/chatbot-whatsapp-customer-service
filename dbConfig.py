@@ -14,7 +14,12 @@ def selectAllProduts():
     myresult = mycursor.fetchall()
     return myresult
 
-def selectAllProductsByCategory(category):
+def selectProductByName(product_name):
+    mycursor.execute("SELECT * FROM products WHERE name = %s", (product_name,))
+    myresult = mycursor.fetchall()
+    return myresult
+
+"""def selectAllProductsByCategory(category):
     mycursor.execute("SELECT * FROM products WHERE category = %s", (category))
     myresult = mycursor.fetchall()
     return myresult
@@ -22,7 +27,7 @@ def selectAllProductsByCategory(category):
 def selectAllProductsByBrand(brand):
     mycursor.execute("SELECT * FROM products WHERE brand = %s", (brand))
     myresult = mycursor.fetchall()
-    return myresult
+    return myresult"""
 
 def selectProductById(id):
     mycursor.execute("SELECT * FROM products WHERE id = %s", (id,))
