@@ -29,13 +29,12 @@ def openUnread():
 
 def firstMessage(input_box):
     messages = [
-        "Hello! Welcome to our service.",
-        "How can I help you?",
+        "Olá! Bem-vindo ao nosso serviço!",
+        "Como posso ajudar você?",
         "",
-        "Select one of the options below:"
+        "Selecione uma das opções abaixo:"
     ]
-    
-    
+
     for message in messages:
         input_box.send_keys(message)
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
@@ -47,14 +46,14 @@ def firstMessage(input_box):
 
 def menu(input_box):
     messages = [
-        "Options:",
+        "Opções:",
         "",
-        "1 - SEE ALL PRODUCTS",
-        "2 - SEE ALL CATEGORIES",
-        "3 - SEE ALL BRANDS",
-        "4 - EXIT",
+        " 1 - VER TODOS OS PRODUTOS",
+        " 2 - VER TODAS AS CATEGORIAS",
+        " 3 - VER TODAS AS MARCAS",
+        " 4 - SAIR ",
         "",
-        "Type the number of the option you want to choose:"
+        "Digite o número da opção que você deseja escolher:"
     ]
 
     for message in messages:
@@ -63,14 +62,12 @@ def menu(input_box):
 
     input_box.send_keys(Keys.ENTER)
 
-def failMenu(input_box):
-    failMessage = "I didn't understand your input, sorry! Please choose an option from below:"
 
+def failMenu(input_box):
+    failMessage = " Não entendi sua resposta, desculpe! Por favor, escolha uma das opções abaixo:"
     input_box.send_keys(failMessage)
     input_box.send_keys(Keys.SHIFT, Keys.ENTER)
-        
     menu(input_box)
-
     input_box.send_keys(Keys.ENTER)
     
 def productMenu(input_box):
@@ -82,10 +79,10 @@ def productMenu(input_box):
     
 def goodbye(input_box):
     messages = [
-        "Thank you for using our service.",
-        "Goodbye!",
+        " Obrigado por usar o nosso serviço.",
+        " Até logo!",
         "",
-        "If you want to use our service again, just send a message."
+        " Se quiser usar nosso serviço novamente, basta enviar uma mensagem."
     ]
 
     for message in messages:
