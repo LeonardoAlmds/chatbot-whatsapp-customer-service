@@ -8,10 +8,11 @@ from collections import defaultdict
 
 import dbConfig
 
-options = webdriver.EdgeOptions()
+options = webdriver.ChromeOptions()
+options.add_argument("--log-level=3") # >> when we go debug this code remove this line <<
 options.add_argument("user-data-dir=C:/caminho/para/pasta/de/perfil")
 
-browser = webdriver.Edge(options=options)
+browser = webdriver.Chrome(options=options)
 wait = WebDriverWait(browser, 10)
 browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
