@@ -8,14 +8,14 @@ from collections import defaultdict
 
 import dbConfig
 
-options = webdriver.EdgeOptions()
+options = webdriver.ChromeOptions()
 options.add_argument("user-data-dir=C:/caminho/para/pasta/de/perfil")
 
-browser = webdriver.Edge(options=options)
+browser = webdriver.Chrome(options=options)
 wait = WebDriverWait(browser, 10)
 browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
-sleep(50)
+sleep(30)
 
 input_box_xpath = '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p'
 body = browser.find_element(By.XPATH, '/html/body')
@@ -27,45 +27,58 @@ def openUnread():
     )
     unreadMessage.click()
 
+def paste_content(browser, el, content):
+    browser.execute_script(
+      f'''
+    const text = `{content}`;
+    const dataTransfer = new DataTransfer();
+    dataTransfer.setData('text', text);
+    const event = new ClipboardEvent('paste', {{
+    clipboardData: dataTransfer,
+    bubbles: true
+    }});
+    arguments[0].dispatchEvent(event)
+    ''',
+        el)
+
 def firstMessage(input_box):
     messages = [
-        "Olá! Bem-vindo ao nosso serviço!",
+        "Olá! Bem-vindo ao nosso serviço! 😄",
         "Como posso ajudar você?",
         "",
-        "Selecione uma das opções abaixo:"
+        "Selecione uma das opções abaixo: 📝"
     ]
 
     for message in messages:
-        input_box.send_keys(message)
-        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
-
+        if message:
+            paste_content(browser, input_box, message)
+            input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+            sleep(0.5)
     menu(input_box)
-        
-    input_box.send_keys(Keys.ENTER)
-    
 
 def menu(input_box):
     messages = [
-        "Opções:",
+        "📋 *Opções:*",
         "",
-        " 1 - VER TODOS OS PRODUTOS",
-        " 2 - VER TODAS AS CATEGORIAS",
-        " 3 - VER TODAS AS MARCAS",
-        " 4 - SAIR ",
+        "[1] - VER TODOS OS PRODUTOS",
+        "[2] - VER TODAS AS CATEGORIAS",
+        "[3] - VER TODAS AS MARCAS",
+        "[4] - SAIR 🚪",
         "",
-        "Digite o número da opção que você deseja escolher:"
+        "✏️ *Digite o número da opção que você deseja escolher:*"
     ]
 
     for message in messages:
-        input_box.send_keys(message)
-        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+        if message:
+            paste_content(browser, input_box, message)
+            input_box.send_keys(Keys.SHIFT, Keys.ENTER)
 
     input_box.send_keys(Keys.ENTER)
 
 
 def failMenu(input_box):
-    failMessage = " Não entendi sua resposta, desculpe! Por favor, escolha uma das opções abaixo:"
-    input_box.send_keys(failMessage)
+    failMessage = "❌ Não entendi sua resposta, desculpe! Por favor, escolha uma das opções abaixo:"
+    paste_content(browser, input_box, failMessage)
     input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     menu(input_box)
     input_box.send_keys(Keys.ENTER)
@@ -79,17 +92,19 @@ def productMenu(input_box):
     
 def goodbye(input_box):
     messages = [
-        " Obrigado por usar o nosso serviço.",
-        " Até logo!",
+        "🙏 Obrigado por usar o nosso serviço.",
+        "👋 Até logo!",
         "",
-        " Se quiser usar nosso serviço novamente, basta enviar uma mensagem."
+        "Se quiser usar nosso serviço novamente, basta enviar uma mensagem."
     ]
 
     for message in messages:
-        input_box.send_keys(message)
-        input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+        if message:
+            paste_content(browser, input_box, message)
+            input_box.send_keys(Keys.SHIFT, Keys.ENTER)
 
     input_box.send_keys(Keys.ENTER)
+
 
 def readMessage():
     try:
