@@ -8,10 +8,10 @@ from collections import defaultdict
 
 import dbConfig
 
-options = webdriver.ChromeOptions()
+options = webdriver.EdgeOptions()
 options.add_argument("user-data-dir=C:/caminho/para/pasta/de/perfil")
 
-browser = webdriver.Chrome(options=options)
+browser = webdriver.Edge(options=options)
 wait = WebDriverWait(browser, 10)
 browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
@@ -29,7 +29,7 @@ def openUnread():
 
 def paste_content(browser, el, content):
     browser.execute_script(
-      f'''
+        f'''
     const text = `{content}`;
     const dataTransfer = new DataTransfer();
     dataTransfer.setData('text', text);
@@ -123,8 +123,11 @@ def readMessage():
 
 def seeAllProducts(input_box):
     products = dbConfig.selectAllProduts()
-    input_box.send_keys("Produtos:")
+    
+    paste_content(browser, input_box, "💻 Produtos:")
     input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+    input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+    
     for product in products:
         message = f"[{product[0]}] {product[1]} - R${product[2]}"
         input_box.send_keys(message)
@@ -221,8 +224,11 @@ def budget(phone, input_box):
 
 def seeAllCategories(input_box):
     categories = dbConfig.selectAllCategories()
-    input_box.send_keys("Categorias:")
+    
+    paste_content(browser, input_box, "📱 Categorias:")
     input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+    input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+    
     for category in categories:
         message = f"{category[1]}"
         input_box.send_keys(message)
@@ -232,13 +238,16 @@ def seeAllCategories(input_box):
 
 def seeAllBrands(input_box):
     brands = dbConfig.selectAllBrands()
-    input_box.send_keys("Marcas:")
+
+    paste_content(browser, input_box, "📦 Marcas:")
     input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+    input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+
     for brand in brands:
         message = f"{brand[1]}"
-        input_box.send_keys(message)
+        paste_content(browser, input_box, message)
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
-    
+
     input_box.send_keys(Keys.ENTER)
 
 def getNumber():
