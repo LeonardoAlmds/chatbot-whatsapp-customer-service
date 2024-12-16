@@ -1,0 +1,72 @@
+ola bom dia, bem vindo ao bot da Restaurate aleatorio
+Selecione uma das opções abaixo para mais:
+
+1 - Ver cardápio
+2 - Fazer pedido
+3 - Lugares Disponíveis
+4 - Horário de atendimento
+5 - Redes sociais
+
+A promoção do dia hoje é:
+**file a parmegiana completo por 29,99*
+Para mais detalhes da promoção ou pedir, digite 6
+
+----------------------------
+1
+
+Cardápio:
+
+lorem impsum - 49,99
+lorem impsum - 49,99
+lorem impsum - 49,99
+lorem impsum - 49,99
+lorem impsum - 49,99
+lorem impsum - 49,99
+lorem impsum - 49,99
+lorem impsum - 49,99
+
+Promoção do dia:
+lorem impsum - 49,99
+
+----------------------------
+2
+
+Digite o nome do prato:
+
+Digite a quantidade:
+
+Digite o endereço:
+
+Pedido Confirmado !!!
+O tempo de entrega previsto é de 30 minutos, podem haver variações
+
+----------------------------
+3
+
+Temos X lugares disponívies hoje, gostaria de reservar um:
+
+Digite o número de pessoas:
+
+Digite o horário:
+
+Seu lugar está reservado !!!
+Sua mesa é a X, ficamos no aguardo.
+
+----------------------------
+4
+
+Funcionamos das 12h até 21h de domingo a domingo na avenida x numero y
+
+----------------------------
+5 
+
+Siga nos nas nossas redes sociais:
+x
+y
+z
+
+----------------------------
+
+Não consegui entender o que você quis dizer, perdão
+
+----------------------------
