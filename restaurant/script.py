@@ -18,7 +18,7 @@ browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
 sleep(30)
 
-input_box_xpath = '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p'
+input_box_xpath = '//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div[1]/div[2]/div[1]/p'
 body = browser.find_element(By.XPATH, '/html/body')
 user_budgets = defaultdict(list)
 
@@ -241,9 +241,11 @@ def save_to_file(phone, plates, total_price):
         file.write(f"\nValor Total: R$ {total_price:.2f}")
 
 def getNumber():
+    print("chegou aqui")
     number = wait.until(
-        EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[4]/div/header/div[2]/div[1]/div/div/span'))
+        EC.presence_of_element_located((By.CLASS_NAME, "_amig"))
     )
+    print(number.text)
     return number.text
 
 currentService = []

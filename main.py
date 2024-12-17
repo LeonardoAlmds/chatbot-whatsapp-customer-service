@@ -16,7 +16,7 @@ browser = webdriver.Chrome(options=options)
 wait = WebDriverWait(browser, 10)
 browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
-sleep(30)
+sleep(15)
 
 input_box_xpath = '/html/body/div[1]/div/div/div[3]/div[4]/div/footer/div[1]/div/span/div/div[2]/div[1]/div/div[1]/p'
 body = browser.find_element(By.XPATH, '/html/body')
@@ -24,7 +24,7 @@ user_budgets = defaultdict(list)
 
 def openUnread():
     unreadMessage = wait.until(
-        EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[3]/div/div[2]/button[2]'))
+        EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div/div[3]/div/div[2]/button[2]'))
     )
     unreadMessage.click()
 
