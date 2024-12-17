@@ -181,45 +181,64 @@ def seeTables(input_box):
     
 user_budgets = defaultdict(list)  # To store user selections
 
-def budget(input_box, phone):
-    """
-    Function to handle user selections for plates and calculate the total budget.
-    """
-    paste_content(browser, input_box, "🛒 *Vamos montar seu pedido!*")
+currentRequest = []
+def budgetFailMenu(input_box):
+    failMessage = "❌ Não entendi sua resposta, desculpe! Por favor, envie o número do prato ou fim para concluir."
+    paste_content(browser, input_box, failMessage)
     input_box.send_keys(Keys.ENTER)
-    sleep(1)
 
-    paste_content(browser, input_box, "Envie o número do prato desejado ou digite *fim* para finalizar o pedido.")
+def arrayBudget(phone):
+    if phone in currentRequest:
+        return False
+    currentRequest.append(phone)
+    print(currentRequest)
+    return True
+def removeBudget(phone):
+    if phone in currentRequest:
+        currentRequest.remove()
+        print("number removed")
+
+def budget(phone, input_box):
+    request = {}  
+    arrayBudget(phone) 
+    
+    paste_content(browser, input_box, "🛒 *Montagem do Pedido*")
+    input_box.send_keys(Keys.ENTER)
+    paste_content(browser, input_box, "Escolha os itens do cardápio pelo número (ou digite 'fim' para concluir):")
     input_box.send_keys(Keys.ENTER)
 
     while True:
-        lastMessage = readMessage()  # Read the last message sent by the user
-        if lastMessage.lower() == "fim":
-            total_price = calculate_total_price(user_budgets[phone])
-            save_to_file(phone, user_budgets[phone], total_price)
-            paste_content(browser, input_box, f"✅ Pedido finalizado! Valor total: R$ {total_price:.2f}")
-            input_box.send_keys(Keys.ENTER)
-            return
+        user_message = readMessage().strip().lower()
+        print(f"Mensagem recebida: {user_message}")  # Debug
 
-        if lastMessage.isdigit():
-            plate_id = int(lastMessage)
-            plate = restDbConfig.selectPlateById(plate_id)
-            if plate:
-                plate_name = plate[0][1]
-                plate_price = plate[0][2]
-                user_budgets[phone].append({"id": plate_id, "name": plate_name, "price": plate_price})
-                
-                paste_content(browser, input_box, f"📝 *{plate_name}* adicionado ao pedido. Preço: R$ {plate_price:.2f}")
-                input_box.send_keys(Keys.ENTER)
-                sleep(0.5)
-                paste_content(browser, input_box, "Digite outro número ou *fim* para finalizar.")
-                input_box.send_keys(Keys.ENTER)
-            else:
-                paste_content(browser, input_box, "❌ Prato não encontrado. Por favor, envie um ID válido.")
-                input_box.send_keys(Keys.ENTER)
-        else:
-            paste_content(browser, input_box, "⚠️ Por favor, envie apenas o número do prato ou *fim* para concluir.")
+        if user_message == "fim":
+            paste_content(browser, input_box, "✅ Pedido concluído!")
             input_box.send_keys(Keys.ENTER)
+            break 
+        if user_message == "1":
+            request["pizza"] = 10
+        elif user_message == "2":
+            request["pasta"] = 8
+        elif user_message == "3":
+            request["salad"] = 5
+        elif user_message == "4":
+            request["bread"] = 2
+        elif user_message == "5":
+            request["water"] = 1
+        elif user_message == "6":
+            request["soda"] = 2
+        else:
+            budgetFailMenu(input_box) 
+            continue
+        paste_content(browser, input_box, f"📝 *Resumo Atual:* {request}")
+        input_box.send_keys(Keys.ENTER)
+
+    total_price = sum(request.values())
+    save_to_file(phone, [{"name": k, "price": v} for k, v in request.items()], total_price)
+    paste_content(browser, input_box, f"💰 *Valor Total:* R$ {total_price:.2f}")
+    input_box.send_keys(Keys.ENTER)
+
+
 
 def calculate_total_price(plates):
     """
@@ -308,13 +327,15 @@ def main():
                     
                     input_box = browser.find_element(By.XPATH, input_box_xpath)
                     body.send_keys(Keys.PAGE_DOWN)
-
-                    if valid:
+                    if phone in currentRequest:
+                        pass
+                    elif valid:
                         firstMessage(input_box)
                     elif valid != True:
                         lastMessage = readMessage()
                         choices(lastMessage, phone, input_box)
                     message = False
+                    
             except Exception as e:
                 print(f"error {e}")
         

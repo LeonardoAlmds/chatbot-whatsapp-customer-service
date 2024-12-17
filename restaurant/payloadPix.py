@@ -70,6 +70,6 @@ class Payload():
 
 
 if __name__ == '__main__':
-    p = Payload('vinicius miguel', '+5581989945697', '01.00', 'bezerros', 'loja01')
+    p = Payload('vinicius miguel', '+5581989945697', '1.00', 'bezerros', 'loja01')
     p.generatePayload()
     
