@@ -8,11 +8,11 @@ from collections import defaultdict
 
 import restDbConfig
 
-options = webdriver.ChromeOptions()
+options = webdriver.EdgeOptions()
 options.add_argument("--log-level=3") # >> when we go debug this code remove this line <<
 options.add_argument("user-data-dir=C:/caminho/para/pasta/de/perfil")
 
-browser = webdriver.Chrome(options=options)
+browser = webdriver.Edge(options=options)
 wait = WebDriverWait(browser, 10)
 browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
@@ -24,7 +24,7 @@ user_budgets = defaultdict(list)
 
 def openUnread():
     unreadMessage = wait.until(
-        EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div[3]/div/div[2]/button[2]'))
+        EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/div/div[3]/div/div[2]/button[2]'))
     )
     unreadMessage.click()
 
@@ -155,7 +155,7 @@ def seeAllPlates(input_box):
     input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
     for plate in plates:
-        message = f"{plate[1]} - Preço: {plate[2]}"
+        message = f"[{plate[0]}] {plate[1]} - Preço: {plate[2]}"
         input_box.send_keys(message)
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
@@ -178,6 +178,67 @@ def seeTables(input_box):
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
     input_box.send_keys(Keys.ENTER)
+    
+user_budgets = defaultdict(list)  # To store user selections
+
+def budget(input_box, phone):
+    """
+    Function to handle user selections for plates and calculate the total budget.
+    """
+    paste_content(browser, input_box, "🛒 *Vamos montar seu pedido!*")
+    input_box.send_keys(Keys.ENTER)
+    sleep(1)
+
+    paste_content(browser, input_box, "Envie o número do prato desejado ou digite *fim* para finalizar o pedido.")
+    input_box.send_keys(Keys.ENTER)
+
+    while True:
+        lastMessage = readMessage()  # Read the last message sent by the user
+        if lastMessage.lower() == "fim":
+            total_price = calculate_total_price(user_budgets[phone])
+            save_to_file(phone, user_budgets[phone], total_price)
+            paste_content(browser, input_box, f"✅ Pedido finalizado! Valor total: R$ {total_price:.2f}")
+            input_box.send_keys(Keys.ENTER)
+            return
+
+        if lastMessage.isdigit():
+            plate_id = int(lastMessage)
+            plate = restDbConfig.selectPlateById(plate_id)
+            if plate:
+                plate_name = plate[0][1]
+                plate_price = plate[0][2]
+                user_budgets[phone].append({"id": plate_id, "name": plate_name, "price": plate_price})
+                
+                paste_content(browser, input_box, f"📝 *{plate_name}* adicionado ao pedido. Preço: R$ {plate_price:.2f}")
+                input_box.send_keys(Keys.ENTER)
+                sleep(0.5)
+                paste_content(browser, input_box, "Digite outro número ou *fim* para finalizar.")
+                input_box.send_keys(Keys.ENTER)
+            else:
+                paste_content(browser, input_box, "❌ Prato não encontrado. Por favor, envie um ID válido.")
+                input_box.send_keys(Keys.ENTER)
+        else:
+            paste_content(browser, input_box, "⚠️ Por favor, envie apenas o número do prato ou *fim* para concluir.")
+            input_box.send_keys(Keys.ENTER)
+
+def calculate_total_price(plates):
+    """
+    Calculate the total price of the plates in the user's budget.
+    """
+    total = sum(plate["price"] for plate in plates)
+    return total
+
+def save_to_file(phone, plates, total_price):
+    """
+    Save the user's budget to a text file.
+    """
+    filename = f"budget_{phone}.txt"
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write(f"Pedido do usuário: {phone}\n")
+        file.write("Pratos selecionados:\n")
+        for plate in plates:
+            file.write(f"- {plate['name']} - R$ {plate['price']:.2f}\n")
+        file.write(f"\nValor Total: R$ {total_price:.2f}")
 
 def getNumber():
     number = wait.until(
@@ -205,7 +266,7 @@ def choices(lastMessage, phone, input_box):
     elif lastMessage == "2":
         seeTables(input_box)
     elif lastMessage == "3":
-        inProgress(input_box)
+        budget(input_box, phone)  # Start the budget process
     elif lastMessage == "4":
         workingHours(input_box)
     elif lastMessage == "5":
