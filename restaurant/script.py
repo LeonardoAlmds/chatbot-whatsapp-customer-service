@@ -7,6 +7,7 @@ from time import sleep
 from collections import defaultdict
 
 import restDbConfig
+import payloadPix
 
 options = webdriver.EdgeOptions()
 options.add_argument("--log-level=3") # >> when we go debug this code remove this line <<
@@ -179,6 +180,16 @@ def seeTables(input_box):
     
     input_box.send_keys(Keys.ENTER)
     
+# On tests, need to put the budget to work before
+def sendPix(input_box):    
+    copyAndPaste = payloadPix.create_payload("Vinicius Miguel", "+5581989945697", "1.00", "Bezerros", "loja01")
+    paste_content(browser, input_box, "📲 *QR Code PIX:*")
+    input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+    input_box.send_keys(Keys.SHIFT, Keys.ENTER)
+    
+    input_box.send_keys(copyAndPaste)
+    input_box.send_keys(Keys.ENTER)
+    
 user_budgets = defaultdict(list)  # To store user selections
 
 currentRequest = []
@@ -297,6 +308,9 @@ def choices(lastMessage, phone, input_box):
         sleep(0.2)
         goodbye(input_box)
         removeNumber(phone)
+    elif lastMessage == "7":
+        print("Sending pix code")
+        sendPix(input_box)
     else:
         print("Invalid option")
         sleep(0.2)
