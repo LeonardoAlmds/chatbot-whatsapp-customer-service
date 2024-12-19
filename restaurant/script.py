@@ -6,6 +6,10 @@ from selenium.webdriver.common.keys import Keys
 from time import sleep
 from collections import defaultdict
 
+import pyautogui
+import pyperclip
+from PIL import Image
+
 import restDbConfig
 import payloadPix
 
@@ -17,7 +21,7 @@ browser = webdriver.Edge(options=options)
 wait = WebDriverWait(browser, 10)
 browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
-sleep(30)
+sleep(15)
 
 input_box_xpath = '//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div[1]/div[2]/div[1]/p'
 body = browser.find_element(By.XPATH, '/html/body')
@@ -48,7 +52,7 @@ def firstMessage(input_box):
         "Olá! Bem vindo ao nosso atendente virtual! 😄",
         "Como posso ajudar você hoje?",
         "",
-        "A promoção de hoje é: 🎉",
+        "A promoção do dia é: 🎉",
         "",
         "🍔 *Hamburguer* - R$ 10,00",
         "🍟 *Batata Frita* - R$ 5,00",
@@ -64,6 +68,7 @@ def firstMessage(input_box):
             sleep(0.5)
     menu(input_box)
 
+# Make less options, to make the menu more intuitive
 def menu(input_box):
     messages = [
         "📋 *Opções:*",
@@ -91,6 +96,7 @@ def failMenu(input_box):
     input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     menu(input_box)
     input_box.send_keys(Keys.ENTER)
+    input_box.send_keys(Keys.ESCAPE)
 
 def goodbye(input_box):
     messages = [
@@ -182,7 +188,7 @@ def seeTables(input_box):
     
 # On tests, need to put the budget to work before
 def sendPix(input_box):    
-    copyAndPaste = payloadPix.create_payload("Vinicius Miguel", "+5581989945697", "1.00", "Bezerros", "loja01")
+    copyAndPaste = payloadPix.create_payload("Vinicius Miguel", "+5581989945697", "1.00", "Bezerros", "loja01") 
     paste_content(browser, input_box, "📲 *QR Code PIX:*")
     input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     input_box.send_keys(Keys.SHIFT, Keys.ENTER)
@@ -190,7 +196,20 @@ def sendPix(input_box):
     input_box.send_keys(copyAndPaste)
     input_box.send_keys(Keys.ENTER)
     
-user_budgets = defaultdict(list)  # To store user selections
+pixQrCodePath = "C:/Users/pedro/Documents/Py/WhatsappPy/pixqrcode.png"
+
+def copyImageToClipboard(pixelCodePath):
+    img  = Image.open(pixelCodePath)
+    img.show()
+    pyperclip.copy("")
+    pyautogui.hotkey("ctrl", "c")
+
+def sendPixQrCode(input_box):
+    pyautogui.hotkey("ctrl", "v")
+    
+    input_box.send_keys(Keys.ENTER)
+    
+user_budgets = defaultdict(list)  # To store user selections1
 
 currentRequest = []
 def budgetFailMenu(input_box):
@@ -311,6 +330,9 @@ def choices(lastMessage, phone, input_box):
     elif lastMessage == "7":
         print("Sending pix code")
         sendPix(input_box)
+    elif lastMessage == "8":
+        print("Sending pix QrCode")
+        sendPixQrCode(input_box)
     else:
         print("Invalid option")
         sleep(0.2)
