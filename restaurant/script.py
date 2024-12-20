@@ -5,10 +5,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from time import sleep
 from collections import defaultdict
-
-import pyautogui
-import pyperclip
-from PIL import Image
+import payloadPix
+import pyautogui as py
 
 import restDbConfig
 import payloadPix
@@ -311,6 +309,17 @@ def removeNumber(phone):
         currentService.remove(phone)
         print(currentService)
 
+def sendPayload(input_box):
+    p = payloadPix.Payload("vinicius miguel", "+5581989945697", "10.00", "bezerros", "loja01")
+    paste_content(browser, input_box, "📲 *QR Code PIX:*")
+    p.generatePayload()
+    input_box.send_keys(p.payload)
+    input_box.send_keys(Keys.CONTROL, 'v')
+    img = browser.find_element(By.XPATH, "/html/body/div[1]/div/div/div[3]/div/div[2]/div[2]/span/div/div/div/div[2]/div/div[1]/div[2]")
+    img.click()
+    input_box.send_keys(Keys.ENTER)
+
+
 def choices(lastMessage, phone, input_box):
     if lastMessage == "1":
         seeAllPlates(input_box)
@@ -323,16 +332,11 @@ def choices(lastMessage, phone, input_box):
     elif lastMessage == "5":
         socialMedia(input_box)
     elif lastMessage == "6":
-        print("Option 4 chosen, removing number")
         sleep(0.2)
         goodbye(input_box)
         removeNumber(phone)
     elif lastMessage == "7":
-        print("Sending pix code")
-        sendPix(input_box)
-    elif lastMessage == "8":
-        print("Sending pix QrCode")
-        sendPixQrCode(input_box)
+        sendPayload(input_box)
     else:
         print("Invalid option")
         sleep(0.2)

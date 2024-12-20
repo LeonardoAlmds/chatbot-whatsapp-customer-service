@@ -1,5 +1,8 @@
 import crcmod
 import qrcode
+from PIL import Image
+import io
+import win32clipboard
 
 class Payload:
     def __init__(self, nome, chavePix, valor, cidade, textId):
@@ -45,27 +48,39 @@ class Payload:
 
     def generatePayload(self):
         self.payload = f"{self.payloadFormat}{self.merchantAccount}{self.merchantCateCod}{self.transactionCurrecy}{self.transactionAmount}{self.countryCode}{self.merchantName}{self.merchantCity}{self.addDataField}{self.crc16}"
-        self.payload_with_crc = self.generateCrc16(self.payload)
-        return self.payload_with_crc
+
+        self.generateCrc16(self.payload)
 
     def generateCrc16(self, payload):
         crc16 = crcmod.mkCrcFun(poly=0x11021, initCrc=0xFFFF, rev=False, xorOut=0x0000)
-        crc16Code = hex(crc16(payload.encode("utf-8"))).replace("0x", "").upper()
-        return f"{payload}{crc16Code}"
+        self.crc16Code = hex(crc16(str(payload).encode("utf-8")))
 
-    def generateQrCode(self, payload, filename="pixqrcode.png"):
+        self.crc16Code_formated = str(self.crc16Code).replace("0x", "").upper()
+        self.completePayload = f"{payload}{self.crc16Code_formated}"
+
+        self.generateQrCode(self.completePayload)
+        return self.completePayload
+
+    def generateQrCode(self, payload):
         qr = qrcode.make(payload)
-        qr.save(filename)
+        output = io.BytesIO()
+        qr.save(output, format="PNG")
+        output.seek(0)
+        self.send_to_clipboard(output)
+        
 
+    def send_to_clipboard(self, image_data):
+        image = Image.open(image_data)
+        with io.BytesIO() as output:
+            image.convert("RGB").save(output, "BMP")
+            data = output.getvalue()[14:]
+            win32clipboard.OpenClipboard()
+            win32clipboard.EmptyClipboard()
+            win32clipboard.SetClipboardData(win32clipboard.CF_DIB, data)
+            win32clipboard.CloseClipboard()
 
-def create_payload(nome, chavePix, valor, cidade, textId, filename="pixqrcode.png"):
-    payload_obj = Payload(nome, chavePix, valor, cidade, textId)
-    payload_with_crc = payload_obj.generatePayload()
-    payload_obj.generateQrCode(payload_with_crc, filename)
-    return payload_with_crc
+payload = Payload.generateCrc16
 
-
-if __name__ == "__main__":
-    chave_pix = create_payload("Vinicius Miguel", "+5581989945697", "1.00", "Bezerros", "loja01")
-    print("\nChave Pix gerada:")
-    print(chave_pix)
+#if __name__ == "__main__":
+ #   p = Payload("vinicius miguel", "+5581989945697", "10.00", "bezerros", "loja01")
+ #   p.generatePayload()
