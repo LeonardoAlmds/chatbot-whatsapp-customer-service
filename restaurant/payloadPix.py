@@ -1,8 +1,11 @@
 import crcmod
 import qrcode
+from PIL import Image
+import io
+import win32clipboard
 
-class Payload():
-    def __init__(self,nome, chavePix, valor, cidade, textId):
+class Payload:
+    def __init__(self, nome, chavePix, valor, cidade, textId):
         self.nome = nome
         self.chavePix = chavePix
         self.valor = valor
@@ -32,9 +35,6 @@ class Payload():
         if self.cidade_tam <= 9:
             self.cidade_tam = f"0{self.cidade_tam}"
 
-
-      
-        
         self.merchantCateCod = "52040000"
         self.transactionCurrecy = "5303986"
         self.transactionAmount = f"54{self.transactionAmount_tam}"
@@ -47,29 +47,38 @@ class Payload():
     def generatePayload(self):
         self.payload = f"{self.payloadFormat}{self.merchantAccount}{self.merchantCateCod}{self.transactionCurrecy}{self.transactionAmount}{self.countryCode}{self.merchantName}{self.merchantCity}{self.addDataField}{self.crc16}"
 
-        print()
-        print(self.payload)
-        print()
         self.generateCrc16(self.payload)
 
     def generateCrc16(self, payload):
-        crc16 = crcmod.mkCrcFun(poly=0x11021, initCrc = 0xFFFF, rev = False, xorOut= 0X0000)
-        self.crc16Code = hex(crc16(str(payload).encode('utf-8')))
+        crc16 = crcmod.mkCrcFun(poly=0x11021, initCrc=0xFFFF, rev=False, xorOut=0x0000)
+        self.crc16Code = hex(crc16(str(payload).encode("utf-8")))
 
-        self.crc16Code_formated = str(self.crc16Code).replace("0x", '').upper()
-
+        self.crc16Code_formated = str(self.crc16Code).replace("0x", "").upper()
         self.completePayload = f"{payload}{self.crc16Code_formated}"
 
-        print(self.completePayload)
-
         self.generateQrCode(self.completePayload)
+        return self.completePayload
 
     def generateQrCode(self, payload):
-        self.qrcode = qrcode.make(payload)
-        self.qrcode.save('pixqrcode.png')
+        qr = qrcode.make(payload)
+        output = io.BytesIO()
+        qr.save(output, format="PNG")
+        output.seek(0)
+        self.send_to_clipboard(output)
+        
 
+    def send_to_clipboard(self, image_data):
+        image = Image.open(image_data)
+        with io.BytesIO() as output:
+            image.convert("RGB").save(output, "BMP")
+            data = output.getvalue()[14:]
+            win32clipboard.OpenClipboard()
+            win32clipboard.EmptyClipboard()
+            win32clipboard.SetClipboardData(win32clipboard.CF_DIB, data)
+            win32clipboard.CloseClipboard()
 
-if __name__ == '__main__':
-    p = Payload('vinicius miguel', '+5581989945697', '1.00', 'bezerros', 'loja01')
-    p.generatePayload()
-    
+payload = Payload.generateCrc16
+
+#if __name__ == "__main__":
+ #   p = Payload("vinicius miguel", "+5581989945697", "10.00", "bezerros", "loja01")
+ #   p.generatePayload()
