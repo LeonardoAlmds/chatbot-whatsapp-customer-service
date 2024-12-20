@@ -10,11 +10,11 @@ import pyautogui as py
 
 import restDbConfig
 
-options = webdriver.EdgeOptions()
+options = webdriver.ChromeOptions()
 options.add_argument("--log-level=3") # >> when we go debug this code remove this line <<
 options.add_argument("user-data-dir=C:/caminho/para/pasta/de/perfil")
 
-browser = webdriver.Edge(options=options)
+browser = webdriver.Chrome(options=options)
 wait = WebDriverWait(browser, 10)
 browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
@@ -286,13 +286,14 @@ def removeNumber(phone):
 def sendPayload(input_box):
     p = payloadPix.Payload("vinicius miguel", "+5581989945697", "10.00", "bezerros", "loja01")
     paste_content(browser, input_box, "📲 *QR Code PIX:*")
-    p.generatePayload()
-    input_box.send_keys(p.payload)
-    input_box.send_keys(Keys.CONTROL, 'v')
-    img = browser.find_element(By.XPATH, "/html/body/div[1]/div/div/div[3]/div/div[2]/div[2]/span/div/div/div/div[2]/div/div[1]/div[2]")
-    img.click()
-    input_box.send_keys(Keys.ENTER)
+    input_box.send_keys(Keys.SHIFT, Keys.ENTER)
 
+    p.generatePayload()
+    input_box.send_keys(Keys.CONTROL, 'v')
+    sleep(2)
+    input_box_img = browser.find_element(By.XPATH, "/html/body/div[1]/div/div/div[3]/div/div[2]/div[2]/span/div/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]/p")
+    input_box_img.send_keys(p.payload)
+    input_box_img.send_keys(Keys.ENTER)
 
 def choices(lastMessage, phone, input_box):
     if lastMessage == "1":
@@ -329,7 +330,7 @@ def main():
     i = 0
     while True:
         while message:
-            body.send_keys(Keys.ESCAPE)
+            #body.send_keys(Keys.ESCAPE)
             try:
                 bubbleNotifications = browser.find_elements(By.CLASS_NAME, "_ahlk")
                 for i in range(len(bubbleNotifications)):
@@ -341,9 +342,8 @@ def main():
                     
                     input_box = browser.find_element(By.XPATH, input_box_xpath)
                     body.send_keys(Keys.PAGE_DOWN)
-                    if phone in currentRequest:
-                        pass
-                    elif valid:
+
+                    if valid:
                         firstMessage(input_box)
                     elif valid != True:
                         lastMessage = readMessage()
