@@ -5,11 +5,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from time import sleep
 from collections import defaultdict
-import payloadPix
-import pyautogui as py
 
 import restDbConfig
 import payloadPix
+import menus
 
 options = webdriver.ChromeOptions()
 options.add_argument("--log-level=3") # >> when we go debug this code remove this line <<
@@ -31,115 +30,8 @@ def openUnread():
     )
     unreadMessage.click()
 
-def paste_content(browser, el, content):
-    browser.execute_script(
-        f'''
-    const text = `{content}`;
-    const dataTransfer = new DataTransfer();
-    dataTransfer.setData('text', text);
-    const event = new ClipboardEvent('paste', {{
-    clipboardData: dataTransfer,
-    bubbles: true
-    }});
-    arguments[0].dispatchEvent(event)
-    ''',
-        el)
-
-def firstMessage(input_box):
-    messages = [
-        "Olá! Bem vindo ao nosso atendente virtual! 😄",
-        "Como posso ajudar você hoje?",
-        "",
-        "A promoção do dia é: 🎉",
-        "",
-        "🍔 *Hamburguer* - R$ 10,00",
-        "🍟 *Batata Frita* - R$ 5,00",
-        "Para mais informações, digite *MENU*.",
-        "",
-        "Selecione uma das opções abaixo: 📝"
-    ]
-
-    for message in messages:
-        if message:
-            paste_content(browser, input_box, message)
-            input_box.send_keys(Keys.SHIFT, Keys.ENTER)
-            sleep(0.5)
-    menu(input_box)
-
-# Make less options, to make the menu more intuitive
-def menu(input_box):
-    messages = [
-        "📋 *Opções:*",
-        "",
-        "[1] - VER CARDÁPIO 🍔",
-        "[2] - LUGARES DISPONÍVEIS 📍",
-        "[3] - FAZER PEDIDO 🛒",
-        "[4] - HORÁRIO DE FUNCIONAMENTO ⏰",
-        "[5] - REDES SOCIAIS 📱",
-        "[6] - SAIR 🚪",
-        "",
-        "✏️ *Digite o número da opção que você deseja escolher:*"
-    ]
-
-    for message in messages:
-        if message:
-            paste_content(browser, input_box, message)
-            input_box.send_keys(Keys.SHIFT, Keys.ENTER)
-
-    input_box.send_keys(Keys.ENTER) 
-
-def failMenu(input_box):
-    failMessage = "❌ Não entendi sua resposta, desculpe! Por favor, escolha uma das opções abaixo:"
-    paste_content(browser, input_box, failMessage)
-    input_box.send_keys(Keys.SHIFT, Keys.ENTER)
-    menu(input_box)
-    input_box.send_keys(Keys.ENTER)
-    input_box.send_keys(Keys.ESCAPE)
-
-def goodbye(input_box):
-    messages = [
-        "🙏 Obrigado por usar o nosso serviço.",
-        "👋 Até logo!",
-        "",
-        "Se quiser usar nosso serviço novamente, basta enviar uma mensagem."
-    ]
-
-    for message in messages:
-        if message:
-            paste_content(browser, input_box, message)
-            input_box.send_keys(Keys.SHIFT, Keys.ENTER)
-
-    input_box.send_keys(Keys.ENTER)
-
-def inProgress(input_box):
-    inProgressMessage = "🔄 Essa função está em desenvolvimento, aguarde..."
-    paste_content(browser, input_box, inProgressMessage)
-    input_box.send_keys(Keys.ENTER)
-    
-def workingHours(input_box):
-    workingHoursMessage = "🕒 Nosso horário de funcionamento é de segunda a sábado, das 11h às 22h."
-    paste_content(browser, input_box, workingHoursMessage)
-    input_box.send_keys(Keys.ENTER)
-    
-def socialMedia(input_box):
-    messages = [
-        "📱 *Redes Sociais:*"
-        "",
-        "📸 *Instagram:* @restaurante",
-        "👍 *Facebook:* /restaurante",
-        "🐦 *Twitter:* @restaurante"
-        ]
-    
-    for message in messages:
-        if message:
-            paste_content(browser, input_box, message)
-            input_box.send_keys(Keys.SHIFT, Keys.ENTER)
-            
-    input_box.send_keys(Keys.ENTER)
-
 def readMessage():
     try:
-
         clientChats = wait.until(
             EC.presence_of_all_elements_located((By.CLASS_NAME, '_akbu'))
         )
@@ -155,7 +47,7 @@ def readMessage():
 def seeAllPlates(input_box):
     plates = restDbConfig.seePlates()
     
-    paste_content(browser, input_box, "🍔 *Cardápio:*")
+    menus.paste_content(browser, input_box, "🍔 *Cardápio:*")
     input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
@@ -182,37 +74,14 @@ def seeTables(input_box):
         input_box.send_keys(message)
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
-    input_box.send_keys(Keys.ENTER)
-    
-# On tests, need to put the budget to work before
-def sendPix(input_box):    
-    copyAndPaste = payloadPix.create_payload("Vinicius Miguel", "+5581989945697", "1.00", "Bezerros", "loja01") 
-    paste_content(browser, input_box, "📲 *QR Code PIX:*")
-    input_box.send_keys(Keys.SHIFT, Keys.ENTER)
-    input_box.send_keys(Keys.SHIFT, Keys.ENTER)
-    
-    input_box.send_keys(copyAndPaste)
-    input_box.send_keys(Keys.ENTER)
-    
-pixQrCodePath = "C:/Users/pedro/Documents/Py/WhatsappPy/pixqrcode.png"
-
-def copyImageToClipboard(pixelCodePath):
-    img  = Image.open(pixelCodePath)
-    img.show()
-    pyperclip.copy("")
-    pyautogui.hotkey("ctrl", "c")
-
-def sendPixQrCode(input_box):
-    pyautogui.hotkey("ctrl", "v")
-    
-    input_box.send_keys(Keys.ENTER)
+    input_box.send_keys(Keys.ENTER)     
     
 user_budgets = defaultdict(list)  # To store user selections1
 
 currentRequest = []
 def budgetFailMenu(input_box):
     failMessage = "❌ Não entendi sua resposta, desculpe! Por favor, envie o número do prato ou fim para concluir."
-    paste_content(browser, input_box, failMessage)
+    menus.paste_content(browser, input_box, failMessage)
     input_box.send_keys(Keys.ENTER)
 
 def arrayBudget(phone):
@@ -230,9 +99,9 @@ def budget(phone, input_box):
     request = {}  
     arrayBudget(phone) 
     
-    paste_content(browser, input_box, "🛒 *Montagem do Pedido*")
+    menus.paste_content(browser, input_box, "🛒 *Montagem do Pedido*")
     input_box.send_keys(Keys.ENTER)
-    paste_content(browser, input_box, "Escolha os itens do cardápio pelo número (ou digite 'fim' para concluir):")
+    menus.paste_content(browser, input_box, "Escolha os itens do cardápio pelo número (ou digite 'fim' para concluir):")
     input_box.send_keys(Keys.ENTER)
 
     while True:
@@ -240,7 +109,7 @@ def budget(phone, input_box):
         print(f"Mensagem recebida: {user_message}")  # Debug
 
         if user_message == "fim":
-            paste_content(browser, input_box, "✅ Pedido concluído!")
+            menus.paste_content(browser, input_box, "✅ Pedido concluído!")
             input_box.send_keys(Keys.ENTER)
             break 
         if user_message == "1":
@@ -258,15 +127,13 @@ def budget(phone, input_box):
         else:
             budgetFailMenu(input_box) 
             continue
-        paste_content(browser, input_box, f"📝 *Resumo Atual:* {request}")
+        menus.paste_content(browser, input_box, f"📝 *Resumo Atual:* {request}")
         input_box.send_keys(Keys.ENTER)
 
     total_price = sum(request.values())
     save_to_file(phone, [{"name": k, "price": v} for k, v in request.items()], total_price)
-    paste_content(browser, input_box, f"💰 *Valor Total:* R$ {total_price:.2f}")
+    menus.paste_content(browser, input_box, f"💰 *Valor Total:* R$ {total_price:.2f}")
     input_box.send_keys(Keys.ENTER)
-
-
 
 def calculate_total_price(plates):
     """
@@ -311,7 +178,7 @@ def removeNumber(phone):
 
 def sendPayload(input_box):
     p = payloadPix.Payload("vinicius miguel", "+5581989945697", "10.00", "bezerros", "loja01")
-    paste_content(browser, input_box, "📲 *QR Code PIX:*")
+    menus.paste_content(browser, input_box, "📲 *QR Code PIX:*")
     input_box.send_keys(Keys.SHIFT, Keys.ENTER)
 
     p.generatePayload()
@@ -321,7 +188,7 @@ def sendPayload(input_box):
     input_box_img.send_keys(p.payload)
     input_box_img.send_keys(Keys.ENTER)
 
-def choices(lastMessage, phone, input_box):
+def choices(lastMessage, phone, input_box, browser):
     if lastMessage == "1":
         seeAllPlates(input_box)
     elif lastMessage == "2":
@@ -329,19 +196,19 @@ def choices(lastMessage, phone, input_box):
     elif lastMessage == "3":
         budget(input_box, phone)  # Start the budget process
     elif lastMessage == "4":
-        workingHours(input_box)
+        menus.workingHours(input_box, browser)
     elif lastMessage == "5":
-        socialMedia(input_box)
+        menus.socialMedia(input_box, browser)
     elif lastMessage == "6":
         sleep(0.2)
-        goodbye(input_box)
+        menus.goodbye(input_box, browser)
         removeNumber(phone)
     elif lastMessage == "7":
         sendPayload(input_box)
     else:
         print("Invalid option")
         sleep(0.2)
-        failMenu(input_box)
+        menus.failMenu(input_box, browser)
     
 def main():
     message = True
@@ -356,7 +223,7 @@ def main():
     i = 0
     while True:
         while message:
-            #body.send_keys(Keys.ESCAPE)
+            body.send_keys(Keys.ESCAPE)
             try:
                 bubbleNotifications = browser.find_elements(By.CLASS_NAME, "_ahlk")
                 for i in range(len(bubbleNotifications)):
@@ -370,10 +237,10 @@ def main():
                     body.send_keys(Keys.PAGE_DOWN)
 
                     if valid:
-                        firstMessage(input_box)
+                        menus.firstMessage(input_box, browser)
                     elif valid != True:
                         lastMessage = readMessage()
-                        choices(lastMessage, phone, input_box)
+                        choices(lastMessage, phone, input_box, browser)
                     message = False
                     
             except Exception as e:
