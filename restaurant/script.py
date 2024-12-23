@@ -88,14 +88,9 @@ def budgetFailMenu(input_box):
     menus.paste_content(browser, input_box, failMessage)
     input_box.send_keys(Keys.ENTER)
 
-def budget(input_box, phone):
+def budget(phone):
     removeNumber(phone)
     budgetList(phone)
-    
-    paste_content(browser, input_box, "🛒 *Montagem do Pedido*")
-    input_box.send_keys(Keys.SHIFT, Keys.ENTER)
-    input_box.send_keys(Keys.SHIFT, Keys.ENTER)
-    seeAllPlates(input_box)
 
 import time  # Para adicionar delays e facilitar o debugging
 
