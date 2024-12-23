@@ -11,7 +11,6 @@ import payloadPix
 import menus
 
 from menus import paste_content
-import menus
 
 options = webdriver.ChromeOptions()
 options.add_argument("--log-level=3") # >> when we go debug this code remove this line <<
@@ -316,7 +315,6 @@ def main():
                         add(lastMessage, phone, input_box)
                     elif valid != True:
                         lastMessage = readMessage()
-                        choices(lastMessage, phone, input_box, browser)
                         choices(lastMessage, phone, input_box, browser)
                     message = False
                     
