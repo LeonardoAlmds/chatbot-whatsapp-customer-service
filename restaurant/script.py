@@ -3,14 +3,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+
 from time import sleep
 from collections import defaultdict
 
 import restDbConfig
 import payloadPix
 import menus
-
-from menus import paste_content
 
 options = webdriver.ChromeOptions()
 options.add_argument("--log-level=3") # >> when we go debug this code remove this line <<
@@ -22,11 +21,11 @@ browser.get("https://web.whatsapp.com/")
 print("Waiting for you scan your QRcode")
 sleep(15)
 
+current_service = []
+budget_service = []
+
 input_box_xpath = '//*[@id="main"]/footer/div[1]/div/span/div/div[2]/div[1]/div[2]/div[1]/p'
 body = browser.find_element(By.XPATH, '/html/body')
-user_budgets = defaultdict(list)
-
-cart = {}
 
 def openUnread():
     unreadMessage = wait.until(
@@ -79,133 +78,11 @@ def seeTables(input_box):
         input_box.send_keys(Keys.SHIFT, Keys.ENTER)
     
     input_box.send_keys(Keys.ENTER)     
-    
-user_budgets = defaultdict(list)  # To store user selections1
 
-currentRequest = []
 def budgetFailMenu(input_box):
     failMessage = "❌ Não entendi sua resposta, desculpe! Por favor, envie o número do prato ou fim para concluir."
     menus.paste_content(browser, input_box, failMessage)
     input_box.send_keys(Keys.ENTER)
-
-def budget(phone):
-    removeNumber(phone)
-    budgetList(phone)
-
-import time  # Para adicionar delays e facilitar o debugging
-
-def add(lastMessage, phone, input_box):
-    # Inicializando o carrinho como um dicionário
-    budget(input_box, phone)  # Envia orçamento inicial
-
-    # Obtendo os pratos disponíveis
-    plates = restDbConfig.seePlates()
-
-    while True:
-        input_box = browser.find_element(By.XPATH, input_box_xpath)
-        print("Recebendo mensagem:", lastMessage)  # Log de entrada
-        time.sleep(1)  # Tempo para visualização
-
-        # Se a mensagem for "fim", sair do loop
-        if lastMessage.lower() == "fim":
-            removeBudget(phone)
-            validationList(phone)
-
-            print("Finalizando o processo.")
-            time.sleep(1)  # Tempo para visualização
-            break
-
-        # Procurando o prato correspondente
-        matching_plate = next((plate for plate in plates if str(lastMessage) == str(plate[0])), None)
-
-        if matching_plate:
-            input_box = browser.find_element(By.XPATH, input_box_xpath)
-            print(f"Prato encontrado: {matching_plate[1]}")  # Log do prato encontrado
-            time.sleep(1)  # Tempo para visualização
-
-            # Adiciona o telefone ao dicionário se não existir
-            if phone not in cart:
-                cart[phone] = []
-                print(f"Novo carrinho criado para {phone}")  # Log para novo carrinho
-                time.sleep(1)  # Tempo para visualização
-
-            # Perguntar quantos itens o cliente deseja
-            input_box.send_keys(f"Quantos itens do prato {matching_plate[1]} você gostaria de adicionar?")
-            input_box.send_keys(Keys.ENTER)
-            print("Perguntando quantidade...")  # Log de pergunta de quantidade
-            time.sleep(1)  # Tempo para visualização
-
-            # Espera pela resposta com a quantidade
-            quantity = int(lastMessage)  # Obtém a quantidade fornecida pelo cliente
-            print(f"Quantidade recebida: {quantity}")  # Log da quantidade
-            time.sleep(1)  # Tempo para visualização
-
-            # Verifica se o prato já não está no carrinho antes de adicionar
-            plate_in_cart = next((item for item in cart[phone] if item[0] == matching_plate[0]), None)
-
-            if plate_in_cart:
-                print(f"Prato {matching_plate[1]} já está no carrinho, atualizando a quantidade.")  # Log de atualização
-                plate_in_cart[3] += quantity  # Atualiza a quantidade no carrinho
-                input_box.send_keys(f"Atualizado: {quantity} unidades de {matching_plate[1]} no seu carrinho.")
-                input_box.send_keys(Keys.ENTER)
-                time.sleep(1)  # Tempo para visualização
-            else:
-                input_box = browser.find_element(By.XPATH, input_box_xpath)
-
-                print(f"Adicionando {quantity} unidades de {matching_plate[1]} ao carrinho.")  # Log de adição
-                cart[phone].append([matching_plate[0], matching_plate[1], matching_plate[2], quantity])
-                input_box.send_keys(f"Adicionado: {quantity} unidades de {matching_plate[1]} ao seu carrinho.")
-                input_box.send_keys(Keys.ENTER)
-                time.sleep(1)  # Tempo para visualização
-
-
-
-            input_box = browser.find_element(By.XPATH, input_box_xpath)
-
-            # Montar a mensagem do carrinho completo
-            cart_message = "Seu carrinho atual:\n"
-            for item in cart[phone]:
-                cart_message += f"- {item[1]} (ID: {item[0]}, Preço: {item[2]}, Quantidade: {item[3]})\n"
-
-            print("Exibindo o carrinho:")  # Log de exibição do carrinho
-            print(cart_message)  # Exibe o carrinho no console para debug
-            
-            
-            # Envia a mensagem completa de uma vez
-            input_box.send_keys(cart_message)
-            input_box.send_keys(Keys.ENTER)
-            time.sleep(1)  # Tempo para visualização
-
-        else:
-            input_box = browser.find_element(By.XPATH, input_box_xpath)
-            input_box.send_keys(phone, "Desculpe, prato não encontrado. Por favor, tente novamente com um ID válido.")
-            input_box.send_keys(Keys.ENTER)
-            print("Prato não encontrado. Solicitando ao usuário que tente novamente.")  # Log de erro
-            time.sleep(1)  # Tempo para visualização
-
-        # Exibe o carrinho atual no console (debug)
-        print("Estado do carrinho:", cart)
-        time.sleep(1)  # Tempo para visualização
-
-
-def calculate_total_price(plates):
-    """
-    Calculate the total price of the plates in the user's budget.
-    """
-    total = sum(plate["price"] for plate in plates)
-    return total
-
-def save_to_file(phone, plates, total_price):
-    """
-    Save the user's budget to a text file.
-    """
-    filename = f"budget_{phone}.txt"
-    with open(filename, "w", encoding="utf-8") as file:
-        file.write(f"Pedido do usuário: {phone}\n")
-        file.write("Pratos selecionados:\n")
-        for plate in plates:
-            file.write(f"- {plate['name']} - R$ {plate['price']:.2f}\n")
-        file.write(f"\nValor Total: R$ {total_price:.2f}")
 
 def getNumber():
     print("chegou aqui")
@@ -215,32 +92,29 @@ def getNumber():
     print(number.text)
     return number.text
 
-currentService = []
-budget_service = []
-
 def validationList(phone):
-    if phone in currentService:
+    if phone in current_service:
         return False
-    currentService.append(phone)
-    print(currentService)
+    current_service.append(phone)
+    print(current_service)
     return True
 
 def budgetList(phone): 
     if phone in budget_service:
         return False
     budget_service.append(phone)
-    print(budget_service)
-    return True
+    print(f"Entrei {budget_service}")
+    return budget_service
 
-def removeBudget(phone):
+def removeNumberBudget(phone): 
     if phone in budget_service:
         budget_service.remove(phone)
-        print(budget_service)
+        print(f"Removi o {phone} do budget")
 
 def removeNumber(phone):
-    if phone in currentService:
-        currentService.remove(phone)
-        print(currentService)
+    if phone in current_service:
+        current_service.remove(phone)
+        print(current_service)
 
 def sendPayload(input_box):
     p = payloadPix.Payload("vinicius miguel", "+5581989945697", "10.00", "bezerros", "loja01")
@@ -254,13 +128,20 @@ def sendPayload(input_box):
     input_box_img.send_keys(p.payload)
     input_box_img.send_keys(Keys.ENTER)
 
+def removeValidListInsertBudgetList(phone):
+    removeNumber(phone)
+    budgetList(phone)
+
+def budgetItems(input_box, phone):
+    print(f"Entrei no budgetItems {input_box}, {phone}")
+
 def choices(lastMessage, phone, input_box, browser):
     if lastMessage == "1":
         seeAllPlates(input_box)
     elif lastMessage == "2":
         seeTables(input_box)
     elif lastMessage == "3":
-        budget(input_box, phone)  # Start the budget process
+        removeValidListInsertBudgetList(phone)
     elif lastMessage == "4":
         menus.workingHours(input_box, browser)
     elif lastMessage == "5":
@@ -298,20 +179,19 @@ def main():
 
                     phone = getNumber()
                     valid = validationList(phone)
-                    budget_service = budgetList(phone)
-                    
+             
                     input_box = browser.find_element(By.XPATH, input_box_xpath)
                     body.send_keys(Keys.PAGE_DOWN)
-                    
-                    if budget_service == True:
-                        menus.firstMessage(input_box, browser)
+
+                    if phone in budget_service:
+                        budgetItems(input_box, phone)
                     elif valid:
-                        lastMessage = readMessage()
-                        add(lastMessage, phone, input_box)
+                        menus.firstMessage(input_box, browser)
                     elif valid != True:
                         lastMessage = readMessage()
                         choices(lastMessage, phone, input_box, browser)
                     message = False
+
                     
             except Exception as e:
                 print(f"error {e}")
